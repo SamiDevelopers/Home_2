@@ -1,0 +1,3014 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة العقار المتكامل - الإصدار النهائي</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <style>
+        /* ============================================================
+           CSS STYLES - نظام إدارة العقار المتكامل
+           ============================================================ */
+        :root {
+            --primary: #1a3a5c;
+            --primary-light: #2c6b9e;
+            --primary-dark: #0f2840;
+            --secondary: #4CAF50;
+            --danger: #c62828;
+            --warning: #e65100;
+            --info: #1565C0;
+            --bg: #f0f4f9;
+            --card-bg: #ffffff;
+            --text: #222;
+            --text-light: #555;
+            --border: #d0d7dd;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --radius: 10px;
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --transition: 0.3s ease;
+            --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            transition: background var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        /* Dark Mode */
+        body.dark {
+            --bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text: #eee;
+            --text-light: #bbb;
+            --border: #2a3a5a;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 3px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--primary-dark);
+            color: #fff;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform var(--transition);
+            transform: translateX(0);
+        }
+        .sidebar.closed {
+            transform: translateX(100%);
+        }
+        .sidebar-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            display: none;
+        }
+        .sidebar-nav {
+            padding: 10px 0;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all var(--transition);
+            border-right: 3px solid transparent;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-right-color: var(--secondary);
+        }
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-right: var(--sidebar-width);
+            min-height: 100vh;
+            transition: margin var(--transition);
+        }
+        .main-content.expanded {
+            margin-right: 0;
+        }
+
+        /* Top Header */
+        .top-header {
+            background: var(--card-bg);
+            padding: 0 24px;
+            height: var(--header-height);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text);
+        }
+        .header-left h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .date-time {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+        .notif-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text);
+        }
+        .notif-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 50%;
+            min-width: 18px;
+            text-align: center;
+        }
+        .dark-mode-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        /* Notifications Panel */
+        .notifications-panel {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            margin: 12px 24px;
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            border-right: 4px solid var(--warning);
+        }
+        .notif-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .notif-header h3 {
+            font-size: 16px;
+        }
+        .notif-header button {
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .notification-item {
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-right: 3px solid;
+            background: var(--bg);
+            cursor: pointer;
+        }
+        .notification-item.urgent {
+            border-right-color: var(--danger);
+        }
+        .notification-item.warning {
+            border-right-color: var(--warning);
+        }
+        .notification-item.info {
+            border-right-color: var(--info);
+        }
+        .notif-text {
+            flex: 1;
+            font-size: 13px;
+        }
+        .notif-time {
+            font-size: 11px;
+            color: var(--text-light);
+            margin: 0 12px;
+        }
+        .notif-dismiss {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            padding: 20px 24px;
+        }
+        .page.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform var(--transition);
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+        .stat-card .stat-icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+        .stat-card .stat-number {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 10px 12px;
+            text-align: center;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        table td {
+            padding: 8px 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        table tr:hover td {
+            background: rgba(26, 58, 92, 0.04);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge.owner {
+            background: #bbdefb;
+            color: #0d47a1;
+        }
+        .badge.tenant {
+            background: #c8e6c9;
+            color: #1b5e20;
+        }
+        .badge.closed {
+            background: #f5f5f5;
+            color: #616161;
+        }
+        .badge.living {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .badge.paid {
+            background: #a5d6a7;
+            color: #1b5e20;
+        }
+        .badge.unpaid {
+            background: #ef9a9a;
+            color: #b71c1c;
+        }
+        .badge.partial {
+            background: #ffe082;
+            color: #e65100;
+        }
+        .badge.yes {
+            background: #a5d6a7;
+            color: #1b5e20;
+        }
+        .badge.no {
+            background: #ef9a9a;
+            color: #b71c1c;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 18px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-light);
+        }
+        .btn-success {
+            background: var(--secondary);
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #388E3C;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #b71c1c;
+        }
+        .btn-warning {
+            background: var(--warning);
+            color: #fff;
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            transition: border var(--transition);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 58, 92, 0.1);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-header h2 {
+            font-size: 20px;
+            color: var(--primary);
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+        .modal-close:hover {
+            color: var(--danger);
+        }
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), #388E3C);
+            transition: width 0.6s ease;
+            border-radius: 4px;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .toolbar input[type="text"],
+        .toolbar select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 13px;
+        }
+        .toolbar input[type="text"] {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        /* Receipt Print Styles */
+        .receipt-print {
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            padding: 12px 16px;
+            background: #fff;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: rtl;
+            min-height: 200px;
+        }
+        .receipt-print .r-header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+        .receipt-print .r-header .r-building {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .receipt-print .r-header .r-address {
+            font-size: 11px;
+            color: #333;
+        }
+        .receipt-print .r-header .r-receipt-type {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 4px;
+            border-top: 1px dashed var(--primary);
+            border-bottom: 1px dashed var(--primary);
+            display: inline-block;
+            padding: 2px 16px;
+        }
+        .receipt-print .r-body .r-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dotted #ccc;
+            padding: 3px 0;
+        }
+        .receipt-print .r-body .r-row .r-label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 12px;
+        }
+        .receipt-print .r-body .r-amount {
+            background: #f0f5fb;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 16px;
+            text-align: center;
+            margin: 5px 0;
+            border: 2px solid var(--primary);
+        }
+        .receipt-print .r-body .r-statement {
+            background: #f9f9f9;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 5px 0;
+            border: 2px solid #ddd;
+            text-align: center;
+            color: var(--primary);
+        }
+        .receipt-print .r-body .r-statement-items {
+            background: #f9f9f9;
+            padding: 8px 14px;
+            border-radius: 4px;
+            margin: 4px 0;
+            border: 2px solid #ddd;
+            font-size: 14px;
+            line-height: 2;
+        }
+        .receipt-print .r-body .r-statement-items .item::before {
+            content: "• ";
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .receipt-print .r-body .r-statement-items .note {
+            display: block;
+            color: var(--danger);
+            font-weight: 600;
+            border-top: 1px dashed var(--danger);
+            padding-top: 3px;
+            margin-top: 2px;
+        }
+        .receipt-print .r-footer {
+            border-top: 2px solid var(--primary);
+            margin-top: 5px;
+            padding-top: 5px;
+            text-align: center;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .receipt-print .r-id {
+            text-align: left;
+            font-size: 9px;
+            color: #999;
+            margin-top: 2px;
+        }
+        .receipt-grid {
+            display: grid;
+            gap: 12px;
+            direction: rtl;
+        }
+        .receipt-grid.cols-1 {
+            grid-template-columns: 1fr;
+        }
+        .receipt-grid.cols-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+        .receipt-grid.cols-3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        .receipt-grid.cols-4 {
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+        }
+        .receipt-grid.cols-6 {
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            z-index: 3000;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+        .toast.success {
+            background: var(--secondary);
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+        .toast.info {
+            background: var(--info);
+        }
+        .toast.warning {
+            background: var(--warning);
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+            .main-content {
+                margin-right: 0;
+            }
+            .menu-btn {
+                display: block;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .receipt-grid.cols-3,
+            .receipt-grid.cols-4,
+            .receipt-grid.cols-6 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .header-left h1 {
+                font-size: 16px;
+            }
+            .date-time {
+                font-size: 11px;
+            }
+            .page {
+                padding: 12px;
+            }
+            .receipt-grid.cols-2,
+            .receipt-grid.cols-3,
+            .receipt-grid.cols-4,
+            .receipt-grid.cols-6 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar,
+            .top-header,
+            .notifications-panel,
+            .toolbar,
+            .no-print {
+                display: none !important;
+            }
+            .main-content {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .page {
+                padding: 0 !important;
+            }
+            .receipt-print {
+                border-color: #000 !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .receipt-print .r-header .r-building,
+            .receipt-print .r-header .r-receipt-type,
+            .receipt-print .r-body .r-amount,
+            .receipt-print .r-body .r-statement,
+            .receipt-print .r-body .r-statement-items,
+            .receipt-print .r-footer {
+                color: #000 !important;
+                border-color: #000 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ============================================================
+    SIDEBAR
+    ============================================================ -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>🏢 نظام إدارة العقار</h2>
+            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="active" data-page="dashboard" onclick="showPage('dashboard')">
+                <i class="fas fa-home"></i> الرئيسية
+            </a>
+            <a href="#" data-page="apartments" onclick="showPage('apartments')">
+                <i class="fas fa-building"></i> العقار والشقق
+            </a>
+            <a href="#" data-page="payments" onclick="showPage('payments')">
+                <i class="fas fa-money-bill-wave"></i> المدفوعات
+            </a>
+            <a href="#" data-page="debts" onclick="showPage('debts')">
+                <i class="fas fa-file-invoice"></i> المديونيات
+            </a>
+            <a href="#" data-page="receipts" onclick="showPage('receipts')">
+                <i class="fas fa-receipt"></i> الإيصالات
+            </a>
+            <a href="#" data-page="expenses" onclick="showPage('expenses')">
+                <i class="fas fa-hand-holding-usd"></i> المصروفات
+            </a>
+            <a href="#" data-page="special-charges" onclick="showPage('special-charges')">
+                <i class="fas fa-exclamation-triangle"></i> الرسوم الخاصة
+            </a>
+            <a href="#" data-page="funds" onclick="showPage('funds')">
+                <i class="fas fa-piggy-bank"></i> الصناديق
+            </a>
+            <a href="#" data-page="reports" onclick="showPage('reports')">
+                <i class="fas fa-chart-bar"></i> التقارير
+            </a>
+            <a href="#" data-page="archive" onclick="showPage('archive')">
+                <i class="fas fa-archive"></i> الأرشيف الشهري
+            </a>
+            <a href="#" data-page="settings" onclick="showPage('settings')">
+                <i class="fas fa-cog"></i> الإعدادات
+            </a>
+            <a href="#" data-page="backup" onclick="showPage('backup')">
+                <i class="fas fa-database"></i> النسخ الاحتياطي
+            </a>
+        </nav>
+    </div>
+
+    <!-- ============================================================
+    MAIN CONTENT
+    ============================================================ -->
+    <div class="main-content" id="mainContent">
+        <!-- Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+                <h1 id="pageTitle">الرئيسية</h1>
+            </div>
+            <div class="header-right">
+                <span class="date-time" id="currentDateTime"></span>
+                <button class="notif-btn" onclick="toggleNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notif-badge" id="notifBadge">0</span>
+                </button>
+                <button class="dark-mode-btn" onclick="toggleDarkMode()">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Notifications Panel -->
+        <div class="notifications-panel" id="notificationsPanel" style="display:none;">
+            <div class="notif-header">
+                <h3>الإشعارات</h3>
+                <button onclick="clearAllNotifications()">مسح الكل</button>
+            </div>
+            <div id="notificationsList"></div>
+        </div>
+
+        <!-- Pages -->
+        <div id="page-dashboard" class="page active"></div>
+        <div id="page-apartments" class="page"></div>
+        <div id="page-payments" class="page"></div>
+        <div id="page-debts" class="page"></div>
+        <div id="page-receipts" class="page"></div>
+        <div id="page-expenses" class="page"></div>
+        <div id="page-special-charges" class="page"></div>
+        <div id="page-funds" class="page"></div>
+        <div id="page-reports" class="page"></div>
+        <div id="page-archive" class="page"></div>
+        <div id="page-settings" class="page"></div>
+        <div id="page-backup" class="page"></div>
+    </div>
+
+    <!-- ============================================================
+    MODALS CONTAINER
+    ============================================================ -->
+    <div id="modalContainer"></div>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        // ============================================================
+        // نظام إدارة العقار المتكامل - JavaScript
+        // ============================================================
+
+        // ============================================================
+        // 1. DATA LAYER - إدارة البيانات
+        // ============================================================
+
+        const AppData = {
+            apartments: [],
+            payments: [],
+            debts: [],
+            expenses: [],
+            specialCharges: [],
+            funds: [],
+            fundTransactions: [],
+            receipts: [],
+            receiptTemplates: [],
+            notifications: [],
+            auditLogs: [],
+            settings: {},
+            currentMonth: '',
+            currentYear: '',
+            selectedIds: new Set(),
+
+            // ============================================================
+            // 1.1 تهيئة البيانات الافتراضية (27 شقة)
+            // ============================================================
+            initDefaultData() {
+                const floors = ['البدروم', 'الأول', 'الثانى', 'الثالث', 'الرابع', 'الخامس',
+                    'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر',
+                    'الحادى عشر', 'الثانى عشر', 'الثالث عشر'
+                ];
+                const locations = ['يمين السلم', 'يسار السلم'];
+                const defaultResidents = [
+                    'فرج ميخائيل', 'عبد المجيد سلطان', 'رضا وهيب', 'ماجد محمد سامي',
+                    'احمد شعبان فتحي', 'سيدة علي', 'مرتضي', 'فادي سمير',
+                    'منتصر احمد علي', 'عاطف رزق', 'محمد عبد المنعم', 'فادي راشد',
+                    'محمد يوسف', 'محمد محسن', 'خالد جمال', 'محمد السيد',
+                    'عبد المعطى', 'جمعة فراج', 'سلامة ماضي', 'احمد سعيد',
+                    'عاطف عبد العزيز', 'ماجدة حبيب', 'رانيا رمزي', 'مشيل انطونيوس',
+                    'محمد جمال احمد', 'جورجيت حبيب', 'سامي عادل'
+                ];
+
+                this.apartments = [];
+                let id = 1;
+
+                floors.forEach((floor, fi) => {
+                    for (let i = 0; i < 2; i++) {
+                        const number = floor === 'البدروم' ? '0' : (fi * 100 + (i + 1) * 100 + i + 1).toString();
+                        const residentIdx = (fi * 2 + i) % defaultResidents.length;
+
+                        // تحديد النوع والحالة بشكل متنوع
+                        let type, status;
+                        if (fi === 0) {
+                            type = 'مغلق';
+                            status = 'مغلقة';
+                        } else if (fi % 3 === 0) {
+                            type = 'مالك';
+                            status = 'ساكنة';
+                        } else if (fi % 3 === 1) {
+                            type = 'مستأجر';
+                            status = 'ساكنة';
+                        } else {
+                            type = 'مالك';
+                            status = fi % 2 === 0 ? 'ساكنة' : 'مغلقة';
+                        }
+
+                        this.apartments.push({
+                            id: id++,
+                            floor: floor,
+                            number: number,
+                            location: locations[i % 2],
+                            resident: defaultResidents[residentIdx] || `ساكن ${id}`,
+                            owner: defaultResidents[residentIdx] || `مالك ${id}`,
+                            type: type,
+                            status: status,
+                            elevator: i === 0 ? 'نعم' : 'لا',
+                            phone: '',
+                            notes: '',
+                            amount: 0,
+                            paid: 0,
+                            created_at: new Date().toISOString()
+                        });
+                    }
+                });
+
+                // الإعدادات الافتراضية
+                this.settings = {
+                    buildingName: 'ملاك برج مريم',
+                    buildingAddress: '31 ش الأمراء التعاون - فيصل',
+                    phone: '',
+                    email: '',
+                    feeOwnerElevator: 170,
+                    feeOwnerNoElevator: 150,
+                    feeTenant: 220,
+                    feeClosed: 0,
+                    receiptPrefix: 'REC',
+                    receiptTitle: 'إيصال الصيانة الشهرية',
+                    receiptFooter: 'شكراً لتعاونكم',
+                    receiptsPerPage: 2
+                };
+
+                // قوالب الإيصالات
+                this.receiptTemplates = [{
+                    id: 'monthly',
+                    name: 'صيانة شهرية',
+                    title: 'إيصال الصيانة الشهرية',
+                    items: ['إيصال الكهرباء الشهري', 'إيصال الصيانة الشهرية للاسانسير', 'صيانة العقار العامة'],
+                    note: 'ملاحظة: يرجى السداد قبل نهاية الشهر'
+                }, {
+                    id: 'electricity',
+                    name: 'كهرباء',
+                    title: 'إيصال الكهرباء',
+                    items: ['قيمة استهلاك الكهرباء للشهر الحالي'],
+                    note: ''
+                }, {
+                    id: 'water',
+                    name: 'مياه',
+                    title: 'إيصال المياه',
+                    items: ['قيمة استهلاك المياه للشهر الحالي'],
+                    note: ''
+                }, {
+                    id: 'repair',
+                    name: 'إصلاحات',
+                    title: 'إيصال إصلاحات',
+                    items: ['أعمال الصيانة والإصلاح'],
+                    note: ''
+                }];
+
+                // الصناديق
+                this.funds = [
+                    { id: 'main', name: 'صندوق الصيانة العامة', balance: 0 },
+                    { id: 'elevator', name: 'صندوق الأسانسير', balance: 0 },
+                    { id: 'water', name: 'صندوق المياه', balance: 0 },
+                    { id: 'emergency', name: 'صندوق الطوارئ', balance: 0 }
+                ];
+
+                this.recalculateAllAmounts();
+                this.save();
+            },
+
+            // ============================================================
+            // 1.2 حساب الرسوم
+            // ============================================================
+            recalculateAllAmounts() {
+                const f = this.settings;
+                this.apartments.forEach(apt => {
+                    let amount = 0;
+                    if (apt.status === 'مغلقة' || apt.type === 'مغلق') {
+                        amount = f.feeClosed || 0;
+                    } else if (apt.type === 'مستأجر') {
+                        amount = f.feeTenant;
+                    } else if (apt.type === 'مالك') {
+                        amount = apt.elevator === 'نعم' ? f.feeOwnerElevator : f.feeOwnerNoElevator;
+                    }
+                    apt.amount = amount;
+                });
+            },
+
+            calculateAmount(apt) {
+                const f = this.settings;
+                if (apt.status === 'مغلقة' || apt.type === 'مغلق') return f.feeClosed || 0;
+                if (apt.type === 'مستأجر') return f.feeTenant;
+                if (apt.type === 'مالك') return apt.elevator === 'نعم' ? f.feeOwnerElevator : f.feeOwnerNoElevator;
+                return 0;
+            },
+
+            // ============================================================
+            // 1.3 حفظ وتحميل
+            // ============================================================
+            save() {
+                try {
+                    const data = {
+                        apartments: this.apartments,
+                        payments: this.payments,
+                        debts: this.debts,
+                        expenses: this.expenses,
+                        specialCharges: this.specialCharges,
+                        funds: this.funds,
+                        fundTransactions: this.fundTransactions,
+                        receipts: this.receipts,
+                        receiptTemplates: this.receiptTemplates,
+                        notifications: this.notifications,
+                        auditLogs: this.auditLogs,
+                        settings: this.settings,
+                        selectedIds: Array.from(this.selectedIds)
+                    };
+                    localStorage.setItem('propertyData', JSON.stringify(data));
+                } catch (e) { console.error('Save error:', e); }
+            },
+
+            load() {
+                try {
+                    const saved = localStorage.getItem('propertyData');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        this.apartments = data.apartments || [];
+                        this.payments = data.payments || [];
+                        this.debts = data.debts || [];
+                        this.expenses = data.expenses || [];
+                        this.specialCharges = data.specialCharges || [];
+                        this.funds = data.funds || [];
+                        this.fundTransactions = data.fundTransactions || [];
+                        this.receipts = data.receipts || [];
+                        this.receiptTemplates = data.receiptTemplates || [];
+                        this.notifications = data.notifications || [];
+                        this.auditLogs = data.auditLogs || [];
+                        this.settings = data.settings || {};
+                        this.selectedIds = new Set(data.selectedIds || []);
+                        return true;
+                    }
+                } catch (e) { console.error('Load error:', e); }
+                return false;
+            },
+
+            // ============================================================
+            // 1.4 العمليات الأساسية
+            // ============================================================
+            getApartment(id) { return this.apartments.find(a => a.id == id); },
+
+            addApartment(apt) {
+                apt.id = this.apartments.length + 1;
+                apt.amount = this.calculateAmount(apt);
+                apt.paid = 0;
+                apt.created_at = new Date().toISOString();
+                this.apartments.push(apt);
+                this.addAuditLog('إضافة شقة', apt);
+                this.save();
+                return apt;
+            },
+
+            updateApartment(id, data) {
+                const apt = this.getApartment(id);
+                if (!apt) return null;
+                const old = { ...apt };
+                Object.assign(apt, data);
+                apt.amount = this.calculateAmount(apt);
+                this.addAuditLog('تعديل شقة', { old, new: apt });
+                this.save();
+                return apt;
+            },
+
+            deleteApartment(id) {
+                this.apartments = this.apartments.filter(a => a.id != id);
+                this.addAuditLog('حذف شقة', { id });
+                this.save();
+                return true;
+            },
+
+            addPayment(payment) {
+                payment.id = 'PAY' + Date.now();
+                payment.created_at = new Date().toISOString();
+                payment.remaining = payment.amount - payment.paid;
+                if (payment.remaining <= 0) {
+                    payment.remaining = 0;
+                    payment.status = 'مدفوع';
+                } else if (payment.paid > 0) {
+                    payment.status = 'دفع جزئي';
+                } else {
+                    payment.status = 'غير مدفوع';
+                }
+                this.payments.push(payment);
+                this.addAuditLog('تسجيل دفعة', payment);
+                this.save();
+                this.addNotification('دفعة جديدة', `تم تسجيل دفعة للشقة ${payment.apartment_number}`);
+                return payment;
+            },
+
+            addDebt(debt) {
+                debt.id = 'DEBT' + Date.now();
+                debt.created_at = new Date().toISOString();
+                debt.remaining = debt.amount;
+                debt.paid_amount = 0;
+                debt.status = 'مستحقة';
+                this.debts.push(debt);
+                this.addAuditLog('تسجيل مديونية', debt);
+                this.save();
+                this.addNotification('مديونية جديدة', `تم تسجيل مديونية للشقة ${debt.apartment_number} بمبلغ ${debt.amount}`);
+                return debt;
+            },
+
+            payDebt(debtId, amount, method) {
+                const debt = this.debts.find(d => d.id === debtId);
+                if (!debt) return null;
+                const paid = Math.min(amount, debt.remaining);
+                debt.paid_amount += paid;
+                debt.remaining = debt.amount - debt.paid_amount;
+                if (debt.remaining <= 0) {
+                    debt.remaining = 0;
+                    debt.status = 'مسددة بالكامل';
+                } else {
+                    debt.status = 'دفع جزئي';
+                }
+                // تسجيل دفعة السداد
+                const payment = {
+                    apartment_id: debt.apartment_id,
+                    apartment_number: debt.apartment_number,
+                    resident_name: debt.resident_name,
+                    amount: paid,
+                    paid: paid,
+                    month: debt.month,
+                    year: debt.year,
+                    payment_type: 'سداد مديونية',
+                    status: 'مدفوع',
+                    method: method,
+                    notes: `سداد مديونية: ${debt.description}`
+                };
+                this.addPayment(payment);
+                this.addAuditLog('سداد مديونية', { debtId, amount: paid });
+                this.save();
+                this.addNotification('سداد مديونية', `تم سداد ${paid} من مديونية الشقة ${debt.apartment_number}`);
+                return debt;
+            },
+
+            addExpense(expense) {
+                expense.id = 'EXP' + Date.now();
+                expense.created_at = new Date().toISOString();
+                this.expenses.push(expense);
+                this.addAuditLog('إضافة مصروف', expense);
+                this.save();
+                return expense;
+            },
+
+            addFundTransaction(transaction) {
+                transaction.id = 'FUND' + Date.now();
+                transaction.created_at = new Date().toISOString();
+                this.fundTransactions.push(transaction);
+                const fund = this.funds.find(f => f.id === transaction.fund_id);
+                if (fund) {
+                    fund.balance += transaction.type === 'إيراد' ? transaction.amount : -transaction.amount;
+                }
+                this.addAuditLog('حركة صندوق', transaction);
+                this.save();
+                return transaction;
+            },
+
+            addNotification(title, message, type = 'info') {
+                const notif = {
+                    id: Date.now().toString(),
+                    title,
+                    message,
+                    type,
+                    read: false,
+                    created_at: new Date().toISOString()
+                };
+                this.notifications.unshift(notif);
+                if (this.notifications.length > 100) this.notifications = this.notifications.slice(0, 100);
+                this.save();
+                return notif;
+            },
+
+            addAuditLog(action, data) {
+                this.auditLogs.push({
+                    id: Date.now().toString(),
+                    action,
+                    data: typeof data === 'string' ? data : JSON.stringify(data),
+                    user: 'Admin',
+                    created_at: new Date().toISOString()
+                });
+                if (this.auditLogs.length > 500) this.auditLogs = this.auditLogs.slice(-500);
+            },
+
+            getCurrentMonth() {
+                const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+                ];
+                return months[new Date().getMonth()];
+            },
+
+            getCurrentYear() {
+                return new Date().getFullYear().toString();
+            }
+        };
+
+        // ============================================================
+        // 2. UI CONTROLLER
+        // ============================================================
+
+        const UIController = {
+            currentPage: 'dashboard',
+
+            init() {
+                if (!AppData.load()) {
+                    AppData.initDefaultData();
+                    AppData.save();
+                }
+                AppData.currentMonth = AppData.getCurrentMonth();
+                AppData.currentYear = AppData.getCurrentYear();
+
+                this.updateDateTime();
+                setInterval(() => this.updateDateTime(), 1000);
+
+                this.showPage('dashboard');
+                this.renderNotifications();
+                setInterval(() => this.checkNotifications(), 300000);
+                setInterval(() => AppData.save(), 60000);
+
+                if (localStorage.getItem('darkMode') === 'true') {
+                    document.body.classList.add('dark');
+                }
+            },
+
+            // ============================================================
+            // 2.1 التنقل
+            // ============================================================
+            showPage(pageId) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                const page = document.getElementById(`page-${pageId}`);
+                if (page) page.classList.add('active');
+
+                document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+                const link = document.querySelector(`.sidebar-nav a[data-page="${pageId}"]`);
+                if (link) link.classList.add('active');
+
+                const titles = {
+                    dashboard: 'الرئيسية',
+                    apartments: 'العقار والشقق',
+                    payments: 'المدفوعات',
+                    debts: 'المديونيات',
+                    receipts: 'الإيصالات',
+                    expenses: 'المصروفات',
+                    'special-charges': 'الرسوم الخاصة',
+                    funds: 'الصناديق',
+                    reports: 'التقارير',
+                    archive: 'الأرشيف الشهري',
+                    settings: 'الإعدادات',
+                    backup: 'النسخ الاحتياطي'
+                };
+                document.getElementById('pageTitle').textContent = titles[pageId] || pageId;
+                this.currentPage = pageId;
+                this.renderPage(pageId);
+            },
+
+            renderPage(pageId) {
+                switch (pageId) {
+                    case 'dashboard':
+                        this.renderDashboard();
+                        break;
+                    case 'apartments':
+                        this.renderApartments();
+                        break;
+                    case 'payments':
+                        this.renderPayments();
+                        break;
+                    case 'debts':
+                        this.renderDebts();
+                        break;
+                    case 'receipts':
+                        this.renderReceipts();
+                        break;
+                    case 'expenses':
+                        this.renderExpenses();
+                        break;
+                    case 'special-charges':
+                        this.renderSpecialCharges();
+                        break;
+                    case 'funds':
+                        this.renderFunds();
+                        break;
+                    case 'reports':
+                        this.renderReports();
+                        break;
+                    case 'archive':
+                        this.renderArchive();
+                        break;
+                    case 'settings':
+                        this.renderSettings();
+                        break;
+                    case 'backup':
+                        this.renderBackup();
+                        break;
+                }
+            },
+
+            // ============================================================
+            // 2.2 Dashboard
+            // ============================================================
+            renderDashboard() {
+                const container = document.getElementById('page-dashboard');
+                const apts = AppData.apartments;
+                const payments = AppData.payments;
+                const debts = AppData.debts;
+                const expenses = AppData.expenses;
+
+                const total = apts.length;
+                const living = apts.filter(a => a.status === 'ساكنة').length;
+                const closed = apts.filter(a => a.status === 'مغلقة').length;
+                const owners = apts.filter(a => a.type === 'مالك').length;
+                const tenants = apts.filter(a => a.type === 'مستأجر').length;
+                const totalAmount = apts.reduce((s, a) => s + (a.amount || 0), 0);
+                const totalPaid = payments.reduce((s, p) => s + (p.paid || 0), 0);
+                const totalDebt = debts.filter(d => d.status !== 'مسددة بالكامل').reduce((s, d) => s + d.remaining, 0);
+                const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+                const rate = totalAmount > 0 ? ((totalPaid / totalAmount) * 100).toFixed(1) : 0;
+                const remaining = totalAmount - totalPaid;
+
+                const now = new Date();
+                const overdue = debts.filter(d => {
+                    if (d.status === 'مسددة بالكامل') return false;
+                    return new Date(d.due_date) < now;
+                });
+
+                container.innerHTML = `
+                            <div class="stats-grid">
+                                <div class="stat-card"><div class="stat-icon">🏠</div><div class="stat-number">${total}</div><div class="stat-label">إجمالي الشقق</div></div>
+                                <div class="stat-card"><div class="stat-icon">🟢</div><div class="stat-number">${living}</div><div class="stat-label">شقق ساكنة</div></div>
+                                <div class="stat-card"><div class="stat-icon">🔴</div><div class="stat-number">${closed}</div><div class="stat-label">شقق مغلقة</div></div>
+                                <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-number">${owners}</div><div class="stat-label">ملاك</div></div>
+                                <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-number">${tenants}</div><div class="stat-label">مستأجرين</div></div>
+                                <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-number">${totalAmount.toFixed(2)}</div><div class="stat-label">المطلوب</div></div>
+                                <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-number">${totalPaid.toFixed(2)}</div><div class="stat-label">المحصل</div></div>
+                                <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-number">${remaining.toFixed(2)}</div><div class="stat-label">المتبقي</div></div>
+                                <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-number">${totalDebt.toFixed(2)}</div><div class="stat-label">الديون</div></div>
+                                <div class="stat-card"><div class="stat-icon">💸</div><div class="stat-number">${totalExpenses.toFixed(2)}</div><div class="stat-label">المصروفات</div></div>
+                                <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-number">${rate}%</div><div class="stat-label">نسبة التحصيل<div class="progress-bar"><div class="progress-fill" style="width:${rate}%"></div></div></div></div>
+                                <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-number">${overdue.length}</div><div class="stat-label">ديون متأخرة</div></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header"><h3>📊 آخر العمليات</h3></div>
+                                <div class="table-container">
+                                    <table>
+                                        <thead><tr><th>التاريخ</th><th>نوع العملية</th><th>التفاصيل</th></tr></thead>
+                                        <tbody>
+                                            ${AppData.auditLogs.slice(-8).reverse().map(log => `
+                                                <tr><td>${new Date(log.created_at).toLocaleDateString('ar-EG')}</td><td>${log.action}</td><td>${typeof log.data === 'string' ? log.data.substring(0, 50) : '...'}</td></tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            // ============================================================
+            // 2.3 إدارة الشقق
+            // ============================================================
+            renderApartments() {
+                const container = document.getElementById('page-apartments');
+                const floorOrder = ['البدروم', 'الأول', 'الثانى', 'الثالث', 'الرابع', 'الخامس',
+                    'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر',
+                    'الحادى عشر', 'الثانى عشر', 'الثالث عشر'
+                ];
+                const sorted = [...AppData.apartments].sort((a, b) => {
+                    const ia = floorOrder.indexOf(a.floor);
+                    const ib = floorOrder.indexOf(b.floor);
+                    if (ia !== ib) return ia - ib;
+                    return parseInt(a.number) - parseInt(b.number);
+                });
+
+                container.innerHTML = `
+                            <div class="toolbar">
+                                <input type="text" id="aptSearch" placeholder="🔍 بحث باسم أو شقة..." oninput="UIController.filterApartments()">
+                                <select id="aptFilterFloor" onchange="UIController.filterApartments()">
+                                    <option value="">جميع الأدوار</option>
+                                    ${floorOrder.map(f => `<option value="${f}">${f}</option>`).join('')}
+                                </select>
+                                <button class="btn btn-primary" onclick="UIController.showAddApartmentModal()">➕ إضافة شقة</button>
+                                <button class="btn btn-success" onclick="UIController.recalculateAll()">🔄 إعادة حساب الرسوم</button>
+                            </div>
+                            <div class="card">
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th><th>الدور</th><th>الشقة</th><th>المكان</th>
+                                                <th>الساكن</th><th>النوع</th><th>الحالة</th>
+                                                <th>أسانسير</th><th>الرسوم</th><th>هاتف</th><th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="apartmentsTableBody">
+                                            ${sorted.map(apt => `
+                                                <tr>
+                                                    <td>${apt.id}</td>
+                                                    <td>${apt.floor}</td>
+                                                    <td><strong>${apt.number}</strong></td>
+                                                    <td>${apt.location || '—'}</td>
+                                                    <td>${apt.resident}</td>
+                                                    <td><span class="badge ${apt.type === 'مالك' ? 'owner' : apt.type === 'مستأجر' ? 'tenant' : 'closed'}">${apt.type}</span></td>
+                                                    <td><span class="badge ${apt.status === 'ساكنة' ? 'living' : 'closed'}">${apt.status}</span></td>
+                                                    <td><span class="badge ${apt.elevator === 'نعم' ? 'yes' : 'no'}">${apt.elevator}</span></td>
+                                                    <td><strong>${apt.amount || 0}</strong></td>
+                                                    <td>${apt.phone || '—'}</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-primary" onclick="UIController.showEditApartmentModal('${apt.id}')">✏️</button>
+                                                        <button class="btn btn-sm btn-danger" onclick="UIController.deleteApartment('${apt.id}')">🗑️</button>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            filterApartments() {
+                const search = document.getElementById('aptSearch')?.value?.toLowerCase() || '';
+                const floor = document.getElementById('aptFilterFloor')?.value || '';
+                const rows = document.querySelectorAll('#apartmentsTableBody tr');
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    const show = (!search || text.includes(search)) && (!floor || text.includes(floor));
+                    row.style.display = show ? '' : 'none';
+                });
+            },
+
+            // ============================================================
+            // 2.4 عرض المدفوعات
+            // ============================================================
+            renderPayments() {
+                const container = document.getElementById('page-payments');
+                const payments = AppData.payments;
+
+                container.innerHTML = `
+                            <div class="toolbar">
+                                <button class="btn btn-primary" onclick="UIController.showAddPaymentModal()">➕ تسجيل دفعة</button>
+                            </div>
+                            <div class="card">
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>رقم العملية</th><th>الشقة</th><th>الساكن</th>
+                                                <th>الشهر</th><th>السنة</th><th>المطلوب</th>
+                                                <th>المدفوع</th><th>المتبقي</th><th>الحالة</th>
+                                                <th>طريقة الدفع</th><th>التاريخ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${payments.length === 0 ? `
+                                                <tr><td colspan="11" style="text-align:center;padding:30px;">لا توجد مدفوعات مسجلة</td></tr>
+                                            ` : payments.map(p => `
+                                                <tr>
+                                                    <td>${p.id}</td>
+                                                    <td>${p.apartment_number}</td>
+                                                    <td>${p.resident_name}</td>
+                                                    <td>${p.month}</td>
+                                                    <td>${p.year}</td>
+                                                    <td>${p.amount.toFixed(2)}</td>
+                                                    <td>${p.paid.toFixed(2)}</td>
+                                                    <td>${(p.amount - p.paid).toFixed(2)}</td>
+                                                    <td><span class="badge ${p.status === 'مدفوع' ? 'paid' : p.status === 'دفع جزئي' ? 'partial' : 'unpaid'}">${p.status}</span></td>
+                                                    <td>${p.method || '—'}</td>
+                                                    <td>${new Date(p.created_at).toLocaleDateString('ar-EG')}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            // ============================================================
+            // 2.5 عرض المديونيات
+            // ============================================================
+            renderDebts() {
+                const container = document.getElementById('page-debts');
+                const debts = AppData.debts;
+
+                const totalDebt = debts.filter(d => d.status !== 'مسددة بالكامل').reduce((s, d) => s + d.remaining, 0);
+                const overdue = debts.filter(d => d.status === 'متأخرة' || (d.status !== 'مسددة بالكامل' && new Date(d
+                    .due_date) < new Date()));
+
+                container.innerHTML = `
+                            <div class="toolbar">
+                                <button class="btn btn-primary" onclick="UIController.showAddDebtModal()">➕ تسجيل مديونية</button>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-number">${totalDebt.toFixed(2)}</div><div class="stat-label">إجمالي الديون</div></div>
+                                <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-number">${overdue.length}</div><div class="stat-label">ديون متأخرة</div></div>
+                                <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-number">${debts.filter(d => d.status === 'مسددة بالكامل').length}</div><div class="stat-label">ديون مسددة</div></div>
+                            </div>
+                            <div class="card">
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>رقم المديونية</th><th>الشقة</th><th>الساكن</th>
+                                                <th>النوع</th><th>الوصف</th><th>المبلغ</th>
+                                                <th>المتبقي</th><th>الحالة</th>
+                                                <th>تاريخ الاستحقاق</th><th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${debts.length === 0 ? `
+                                                <tr><td colspan="10" style="text-align:center;padding:30px;">لا توجد مديونيات مسجلة</td></tr>
+                                            ` : debts.map(d => `
+                                                <tr>
+                                                    <td>${d.id}</td>
+                                                    <td>${d.apartment_number}</td>
+                                                    <td>${d.resident_name}</td>
+                                                    <td>${d.debt_type}</td>
+                                                    <td>${d.description}</td>
+                                                    <td>${d.amount.toFixed(2)}</td>
+                                                    <td><strong>${d.remaining.toFixed(2)}</strong></td>
+                                                    <td><span class="badge ${d.status === 'مسددة بالكامل' ? 'paid' : d.status === 'متأخرة' ? 'unpaid' : 'partial'}">${d.status}</span></td>
+                                                    <td>${new Date(d.due_date).toLocaleDateString('ar-EG')}</td>
+                                                    <td>
+                                                        ${d.status !== 'مسددة بالكامل' ? `
+                                                            <button class="btn btn-sm btn-success" onclick="UIController.showPayDebtModal('${d.id}')">💰 سداد</button>
+                                                        ` : ''}
+                                                        <button class="btn btn-sm btn-danger" onclick="UIController.deleteDebt('${d.id}')">🗑️</button>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            // ============================================================
+            // 2.6 الإيصالات
+            // ============================================================
+            renderReceipts() {
+                const container = document.getElementById('page-receipts');
+                const templates = AppData.receiptTemplates;
+
+                container.innerHTML = `
+                            <div class="card">
+                                <div class="card-header"><h3>🧾 طباعة الإيصالات</h3></div>
+                                <div class="toolbar">
+                                    <select id="receiptTemplate" onchange="UIController.updateReceiptPreview()">
+                                        ${templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+                                    </select>
+                                    <input type="text" id="receiptMonth" value="${AppData.currentMonth}" style="width:100px;">
+                                    <input type="text" id="receiptYear" value="${AppData.currentYear}" style="width:70px;">
+                                    <input type="text" id="receiptStatement" placeholder="عنوان الإيصال" style="min-width:200px;">
+                                    <textarea id="receiptItems" placeholder="نقاط الإيصال" rows="2" style="min-width:200px;"></textarea>
+                                    <input type="text" id="receiptNote" placeholder="ملاحظة" style="min-width:150px;">
+                                    <select id="receiptCols">
+                                        <option value="1">1 إيصال</option>
+                                        <option value="2" selected>2 إيصال</option>
+                                        <option value="3">3 إيصال</option>
+                                        <option value="4">4 إيصال</option>
+                                        <option value="6">6 إيصال</option>
+                                    </select>
+                                    <button class="btn btn-primary" onclick="UIController.previewReceipts()">👁️ معاينة</button>
+                                    <button class="btn btn-success" onclick="UIController.printReceipts()">🖨️ طباعة</button>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header"><h3>📋 اختيار الشقق للطباعة</h3></div>
+                                <div class="table-container" style="max-height:400px;overflow-y:auto;">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th><input type="checkbox" onchange="UIController.toggleAllReceipts(this.checked)"></th>
+                                                <th>#</th><th>الدور</th><th>الشقة</th><th>الساكن</th><th>النوع</th><th>الرسوم</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${AppData.apartments.map(apt => `
+                                                <tr>
+                                                    <td><input type="checkbox" class="receipt-select" data-id="${apt.id}" ${AppData.selectedIds.has(apt.id) ? 'checked' : ''}></td>
+                                                    <td>${apt.id}</td>
+                                                    <td>${apt.floor}</td>
+                                                    <td>${apt.number}</td>
+                                                    <td>${apt.resident}</td>
+                                                    <td><span class="badge ${apt.type === 'مالك' ? 'owner' : apt.type === 'مستأجر' ? 'tenant' : 'closed'}">${apt.type}</span></td>
+                                                    <td>${apt.amount || 0}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="receiptPreviewContainer" style="display:none;" class="card">
+                                <div class="card-header"><h3>👁️ معاينة الإيصالات</h3>
+                                    <button class="btn btn-danger" onclick="document.getElementById('receiptPreviewContainer').style.display='none'">إخفاء</button>
+                                </div>
+                                <div id="receiptPreviewContent"></div>
+                            </div>
+                        `;
+
+                // تحميل القالب الأول
+                if (templates.length > 0) {
+                    const t = templates[0];
+                    document.getElementById('receiptStatement').value = t.title;
+                    document.getElementById('receiptItems').value = t.items.join('\n');
+                    document.getElementById('receiptNote').value = t.note || '';
+                }
+            },
+
+            toggleAllReceipts(checked) {
+                document.querySelectorAll('.receipt-select').forEach(cb => {
+                    cb.checked = checked;
+                    const id = parseInt(cb.dataset.id);
+                    if (checked) AppData.selectedIds.add(id);
+                    else AppData.selectedIds.delete(id);
+                });
+                AppData.save();
+            },
+
+            updateReceiptPreview() {
+                const id = document.getElementById('receiptTemplate').value;
+                const t = AppData.receiptTemplates.find(t => t.id === id);
+                if (t) {
+                    document.getElementById('receiptStatement').value = t.title;
+                    document.getElementById('receiptItems').value = t.items.join('\n');
+                    document.getElementById('receiptNote').value = t.note || '';
+                }
+            },
+
+            previewReceipts() {
+                const selected = document.querySelectorAll('.receipt-select:checked');
+                if (selected.length === 0) {
+                    this.showToast('الرجاء اختيار شقة واحدة على الأقل', 'warning');
+                    return;
+                }
+
+                const ids = Array.from(selected).map(cb => parseInt(cb.dataset.id));
+                const apartments = AppData.apartments.filter(a => ids.includes(a.id));
+
+                const container = document.getElementById('receiptPreviewContainer');
+                const content = document.getElementById('receiptPreviewContent');
+                const cols = parseInt(document.getElementById('receiptCols').value) || 2;
+                const month = document.getElementById('receiptMonth').value || AppData.currentMonth;
+                const year = document.getElementById('receiptYear').value || AppData.currentYear;
+                const statement = document.getElementById('receiptStatement').value || 'إيصال الصيانة';
+                const items = document.getElementById('receiptItems').value.split('\n').filter(s => s.trim());
+                const note = document.getElementById('receiptNote').value || '';
+
+                let html = `<div class="receipt-grid cols-${cols}">`;
+                apartments.forEach(apt => {
+                    html += this.buildReceiptHTML(apt, { month, year, statement, items, note });
+                });
+                html += '</div>';
+
+                content.innerHTML = html;
+                container.style.display = 'block';
+            },
+
+            buildReceiptHTML(apt, opts) {
+                const bName = AppData.settings.buildingName || 'ملاك برج مريم';
+                const bAddr = AppData.settings.buildingAddress || '31 ش الأمراء التعاون - فيصل';
+                const today = new Date().toLocaleDateString('ar-EG');
+
+                const itemsHtml = opts.items.map(item =>
+                    `<span class="item">${item.trim()}</span>`
+                ).join('');
+
+                return `
+                            <div class="receipt-print">
+                                <div class="r-header">
+                                    <div class="r-building">🏢 ${bName}</div>
+                                    <div class="r-address">${bAddr}</div>
+                                    <div class="r-receipt-type">${opts.statement}</div>
+                                </div>
+                                <div class="r-body">
+                                    <div class="r-row"><span class="r-label">📅 شهر:</span><span class="r-value">${opts.month}</span><span class="r-label">🗓️ عام:</span><span class="r-value">${opts.year} م</span></div>
+                                    <div class="r-row"><span class="r-label">🏠 الدور:</span><span class="r-value">${apt.floor}</span><span class="r-label">📌 الشقة:</span><span class="r-value">${apt.number}</span></div>
+                                    <div class="r-row"><span class="r-label">👤 وصلني من السيد:</span><span class="r-value">${apt.resident}</span></div>
+                                    <div class="r-row"><span class="r-label">🏷️ النوع:</span><span class="r-value">${apt.type}</span><span class="r-label">🛗 الأسانسير:</span><span class="r-value">${apt.elevator === 'نعم' ? '✅ يستخدم' : '❌ لا يستخدم'}</span></div>
+                                    <div class="r-amount">💰 ${apt.amount || 0} جنيهاً لا غير</div>
+                                    <div class="r-statement">📋 ${opts.statement}</div>
+                                    ${itemsHtml ? `<div class="r-statement-items">${itemsHtml}</div>` : ''}
+                                    ${opts.note ? `<div class="r-statement-items"><span class="note">${opts.note}</span></div>` : ''}
+                                    <div class="r-row" style="border:none;"><span class="r-label">📆 تحريراً في:</span><span class="r-value">${today}</span></div>
+                                </div>
+                                <div class="r-footer"><span class="r-owner">🏢 ${bName}</span></div>
+                                <div class="r-id">#${apt.id} - ${apt.number}</div>
+                            </div>
+                        `;
+            },
+
+            printReceipts() {
+                const container = document.getElementById('receiptPreviewContainer');
+                if (container.style.display === 'none') {
+                    this.previewReceipts();
+                    setTimeout(() => window.print(), 500);
+                } else {
+                    window.print();
+                }
+            },
+
+            // ============================================================
+            // 2.7 المصروفات
+            // ============================================================
+            renderExpenses() {
+                const container = document.getElementById('page-expenses');
+                const expenses = AppData.expenses;
+
+                container.innerHTML = `
+                            <div class="toolbar">
+                                <button class="btn btn-primary" onclick="UIController.showAddExpenseModal()">➕ إضافة مصروف</button>
+                            </div>
+                            <div class="card">
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>رقم المصروف</th><th>التاريخ</th><th>الشهر</th>
+                                                <th>السنة</th><th>النوع</th><th>الوصف</th>
+                                                <th>المبلغ</th><th>طريقة الدفع</th><th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${expenses.length === 0 ? `
+                                                <tr><td colspan="9" style="text-align:center;padding:30px;">لا توجد مصروفات مسجلة</td></tr>
+                                            ` : expenses.map(e => `
+                                                <tr>
+                                                    <td>${e.id}</td>
+                                                    <td>${new Date(e.created_at || e.date).toLocaleDateString('ar-EG')}</td>
+                                                    <td>${e.month}</td>
+                                                    <td>${e.year}</td>
+                                                    <td>${e.expense_type}</td>
+                                                    <td>${e.description}</td>
+                                                    <td><strong>${e.amount.toFixed(2)}</strong></td>
+                                                    <td>${e.method || '—'}</td>
+                                                    <td><button class="btn btn-sm btn-danger" onclick="UIController.deleteExpense('${e.id}')">🗑️</button></td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            // ============================================================
+            // 2.8 الرسوم الخاصة
+            // ============================================================
+            renderSpecialCharges() {
+                const container = document.getElementById('page-special-charges');
+                const charges = AppData.specialCharges;
+
+                container.innerHTML = `
+                            <div class="toolbar">
+                                <button class="btn btn-primary" onclick="UIController.showAddSpecialChargeModal()">➕ إضافة رسوم خاصة</button>
+                            </div>
+                            <div class="card">
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>رقم الرسوم</th><th>الاسم</th><th>السبب</th>
+                                                <th>المبلغ</th><th>تاريخ الاستحقاق</th><th>الحالة</th><th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${charges.length === 0 ? `
+                                                <tr><td colspan="7" style="text-align:center;padding:30px;">لا توجد رسوم خاصة مسجلة</td></tr>
+                                            ` : charges.map(c => `
+                                                <tr>
+                                                    <td>${c.id}</td>
+                                                    <td>${c.name}</td>
+                                                    <td>${c.reason}</td>
+                                                    <td>${c.amount.toFixed(2)}</td>
+                                                    <td>${new Date(c.due_date).toLocaleDateString('ar-EG')}</td>
+                                                    <td><span class="badge ${c.status === 'مدفوع' ? 'paid' : 'unpaid'}">${c.status}</span></td>
+                                                    <td><button class="btn btn-sm btn-danger" onclick="UIController.deleteSpecialCharge('${c.id}')">🗑️</button></td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            // ============================================================
+            // 2.9 الصناديق
+            // ============================================================
+            renderFunds() {
+                const container = document.getElementById('page-funds');
+                const funds = AppData.funds;
+
+                container.innerHTML = `
+                            <div class="stats-grid">
+                                ${funds.map(f => `
+                                    <div class="stat-card">
+                                        <div class="stat-icon">🏦</div>
+                                        <div class="stat-number">${f.balance.toFixed(2)}</div>
+                                        <div class="stat-label">${f.name}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="card">
+                                <div class="card-header"><h3>📊 حركة الصناديق</h3>
+                                    <button class="btn btn-primary" onclick="UIController.showAddFundTransactionModal()">➕ إضافة حركة</button>
+                                </div>
+                                <div class="table-container">
+                                    <table>
+                                        <thead><tr><th>التاريخ</th><th>الصندوق</th><th>النوع</th><th>البيان</th><th>المبلغ</th></tr></thead>
+                                        <tbody>
+                                            ${AppData.fundTransactions.length === 0 ? `
+                                                <tr><td colspan="5" style="text-align:center;padding:30px;">لا توجد حركات مسجلة</td></tr>
+                                            ` : AppData.fundTransactions.slice(-20).reverse().map(t => {
+                                                const fund = funds.find(f => f.id === t.fund_id);
+                                                return `
+                                                    <tr>
+                                                        <td>${new Date(t.created_at).toLocaleDateString('ar-EG')}</td>
+                                                        <td>${fund ? fund.name : '—'}</td>
+                                                        <td><span class="badge ${t.type === 'إيراد' ? 'paid' : 'unpaid'}">${t.type}</span></td>
+                                                        <td>${t.description}</td>
+                                                        <td>${t.amount.toFixed(2)}</td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            // ============================================================
+            // 2.10 التقارير
+            // ============================================================
+            renderReports() {
+                const container = document.getElementById('page-reports');
+                const apts = AppData.apartments;
+                const payments = AppData.payments;
+                const debts = AppData.debts;
+                const expenses = AppData.expenses;
+
+                const totalAmount = apts.reduce((s, a) => s + (a.amount || 0), 0);
+                const totalPaid = payments.reduce((s, p) => s + (p.paid || 0), 0);
+                const totalDebt = debts.filter(d => d.status !== 'مسددة بالكامل').reduce((s, d) => s + d.remaining, 0);
+                const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+                const rate = totalAmount > 0 ? ((totalPaid / totalAmount) * 100).toFixed(1) : 0;
+
+                container.innerHTML = `
+                            <div class="stats-grid">
+                                <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-number">${totalAmount.toFixed(2)}</div><div class="stat-label">إجمالي المطلوب</div></div>
+                                <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-number">${totalPaid.toFixed(2)}</div><div class="stat-label">إجمالي المحصل</div></div>
+                                <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-number">${totalDebt.toFixed(2)}</div><div class="stat-label">إجمالي الديون</div></div>
+                                <div class="stat-card"><div class="stat-icon">💸</div><div class="stat-number">${totalExpenses.toFixed(2)}</div><div class="stat-label">إجمالي المصروفات</div></div>
+                                <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-number">${rate}%</div><div class="stat-label">نسبة التحصيل</div></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header"><h3>📊 التقارير المتاحة</h3></div>
+                                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+                                    <button class="btn btn-primary" onclick="UIController.generateMonthlyReport()">📅 التقرير الشهري</button>
+                                    <button class="btn btn-primary" onclick="UIController.generateDebtReport()">📋 تقرير المديونيات</button>
+                                    <button class="btn btn-primary" onclick="UIController.generateFinancialReport()">💰 التقرير المالي</button>
+                                    <button class="btn btn-primary" onclick="UIController.generateExpenseReport()">💸 تقرير المصروفات</button>
+                                </div>
+                            </div>
+                            <div id="reportContent" class="card">
+                                <div style="text-align:center;padding:30px;color:var(--text-light);">
+                                    <div style="font-size:48px;">📊</div>
+                                    <p>اختر نوع التقرير لعرضه هنا</p>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            generateMonthlyReport() {
+                const container = document.getElementById('reportContent');
+                const month = AppData.currentMonth;
+                const year = AppData.currentYear;
+                const apts = AppData.apartments;
+                const payments = AppData.payments.filter(p => p.month === month && p.year === year);
+
+                const total = apts.reduce((s, a) => s + (a.amount || 0), 0);
+                const paid = payments.reduce((s, p) => s + p.paid, 0);
+                const rate = total > 0 ? ((paid / total) * 100).toFixed(1) : 0;
+                const paidCount = payments.filter(p => p.status === 'مدفوع').length;
+                const partialCount = payments.filter(p => p.status === 'دفع جزئي').length;
+                const unpaidCount = apts.filter(a => a.status === 'ساكنة').length - paidCount - partialCount;
+
+                container.innerHTML = `
+                            <h3 style="margin-bottom:16px;">📅 التقرير الشهري - ${month} ${year}</h3>
+                            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
+                                <div class="stat-card"><div class="stat-number">${total.toFixed(2)}</div><div class="stat-label">المطلوب</div></div>
+                                <div class="stat-card"><div class="stat-number">${paid.toFixed(2)}</div><div class="stat-label">المحصل</div></div>
+                                <div class="stat-card"><div class="stat-number">${(total - paid).toFixed(2)}</div><div class="stat-label">المتبقي</div></div>
+                                <div class="stat-card"><div class="stat-number">${rate}%</div><div class="stat-label">نسبة التحصيل</div></div>
+                                <div class="stat-card"><div class="stat-number">${paidCount}</div><div class="stat-label">مدفوع بالكامل</div></div>
+                                <div class="stat-card"><div class="stat-number">${partialCount}</div><div class="stat-label">دفع جزئي</div></div>
+                                <div class="stat-card"><div class="stat-number">${unpaidCount}</div><div class="stat-label">غير مدفوع</div></div>
+                            </div>
+                            <div style="margin-top:12px;text-align:center;"><button class="btn btn-success" onclick="window.print()">🖨️ طباعة التقرير</button></div>
+                        `;
+            },
+
+            generateDebtReport() {
+                const container = document.getElementById('reportContent');
+                const debts = AppData.debts.filter(d => d.status !== 'مسددة بالكامل');
+
+                container.innerHTML = `
+                            <h3 style="margin-bottom:16px;">📋 تقرير المديونيات</h3>
+                            <div class="table-container">
+                                <table>
+                                    <thead><tr><th>الشقة</th><th>الساكن</th><th>النوع</th><th>المبلغ</th><th>المتبقي</th><th>الحالة</th></tr></thead>
+                                    <tbody>
+                                        ${debts.length === 0 ? `
+                                            <tr><td colspan="6" style="text-align:center;padding:20px;">لا توجد ديون مستحقة</td></tr>
+                                        ` : debts.map(d => `
+                                            <tr>
+                                                <td>${d.apartment_number}</td>
+                                                <td>${d.resident_name}</td>
+                                                <td>${d.debt_type}</td>
+                                                <td>${d.amount.toFixed(2)}</td>
+                                                <td><strong>${d.remaining.toFixed(2)}</strong></td>
+                                                <td><span class="badge ${d.status === 'متأخرة' ? 'unpaid' : 'partial'}">${d.status}</span></td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top:12px;text-align:center;"><button class="btn btn-success" onclick="window.print()">🖨️ طباعة التقرير</button></div>
+                        `;
+            },
+
+            generateFinancialReport() {
+                const container = document.getElementById('reportContent');
+                const payments = AppData.payments;
+                const expenses = AppData.expenses;
+                const income = payments.reduce((s, p) => s + p.paid, 0);
+                const exp = expenses.reduce((s, e) => s + e.amount, 0);
+
+                container.innerHTML = `
+                            <h3 style="margin-bottom:16px;">💰 التقرير المالي</h3>
+                            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+                                <div class="stat-card"><div class="stat-number">${income.toFixed(2)}</div><div class="stat-label">إجمالي الإيرادات</div></div>
+                                <div class="stat-card"><div class="stat-number">${exp.toFixed(2)}</div><div class="stat-label">إجمالي المصروفات</div></div>
+                                <div class="stat-card"><div class="stat-number" style="color:${(income - exp) >= 0 ? 'var(--secondary)' : 'var(--danger)'};">${(income - exp).toFixed(2)}</div><div class="stat-label">صافي الربح</div></div>
+                            </div>
+                            <div style="margin-top:12px;text-align:center;"><button class="btn btn-success" onclick="window.print()">🖨️ طباعة التقرير</button></div>
+                        `;
+            },
+
+            generateExpenseReport() {
+                const container = document.getElementById('reportContent');
+                const expenses = AppData.expenses;
+                const total = expenses.reduce((s, e) => s + e.amount, 0);
+
+                const byType = {};
+                expenses.forEach(e => { byType[e.expense_type] = (byType[e.expense_type] || 0) + e.amount; });
+
+                container.innerHTML = `
+                            <h3 style="margin-bottom:16px;">💸 تقرير المصروفات</h3>
+                            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+                                <div class="stat-card"><div class="stat-number">${total.toFixed(2)}</div><div class="stat-label">إجمالي المصروفات</div></div>
+                                <div class="stat-card"><div class="stat-number">${expenses.length}</div><div class="stat-label">عدد العمليات</div></div>
+                            </div>
+                            <div style="margin-top:12px;">
+                                <h4>تفاصيل المصروفات حسب النوع:</h4>
+                                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px;">
+                                    ${Object.entries(byType).map(([type, amount]) => `
+                                        <div style="background:var(--bg);padding:10px;border-radius:6px;text-align:center;">
+                                            <div style="font-weight:600;">${type}</div>
+                                            <div style="font-size:18px;font-weight:700;color:var(--danger);">${amount.toFixed(2)}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div style="margin-top:12px;text-align:center;"><button class="btn btn-success" onclick="window.print()">🖨️ طباعة التقرير</button></div>
+                        `;
+            },
+
+            // ============================================================
+            // 2.11 الأرشيف
+            // ============================================================
+            renderArchive() {
+                const container = document.getElementById('page-archive');
+                const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+                ];
+                const years = [2024, 2025, 2026];
+
+                container.innerHTML = `
+                            <div class="toolbar">
+                                <select id="archiveYear" onchange="UIController.renderArchiveData()">
+                                    ${years.map(y => `<option value="${y}" ${y == AppData.currentYear ? 'selected' : ''}>${y}</option>`).join('')}
+                                </select>
+                                <select id="archiveMonth" onchange="UIController.renderArchiveData()">
+                                    ${months.map(m => `<option value="${m}" ${m === AppData.currentMonth ? 'selected' : ''}>${m}</option>`).join('')}
+                                </select>
+                                <button class="btn btn-primary" onclick="UIController.renderArchiveData()">📊 عرض</button>
+                            </div>
+                            <div id="archiveContent" class="card">
+                                <div style="text-align:center;padding:30px;color:var(--text-light);">
+                                    <div style="font-size:48px;">📅</div>
+                                    <p>اختر الشهر والسنة لعرض البيانات</p>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            renderArchiveData() {
+                const container = document.getElementById('archiveContent');
+                const month = document.getElementById('archiveMonth').value;
+                const year = document.getElementById('archiveYear').value;
+
+                const payments = AppData.payments.filter(p => p.month === month && p.year === year);
+                const debts = AppData.debts.filter(d => d.month === month && d.year === year);
+                const expenses = AppData.expenses.filter(e => e.month === month && e.year === year);
+
+                const paid = payments.reduce((s, p) => s + p.paid, 0);
+                const debt = debts.filter(d => d.status !== 'مسددة بالكامل').reduce((s, d) => s + d.remaining, 0);
+                const exp = expenses.reduce((s, e) => s + e.amount, 0);
+
+                container.innerHTML = `
+                            <h3 style="margin-bottom:16px;">📅 بيانات ${month} ${year}</h3>
+                            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
+                                <div class="stat-card"><div class="stat-number">${payments.length}</div><div class="stat-label">عدد المدفوعات</div></div>
+                                <div class="stat-card"><div class="stat-number">${paid.toFixed(2)}</div><div class="stat-label">المحصل</div></div>
+                                <div class="stat-card"><div class="stat-number">${debt.toFixed(2)}</div><div class="stat-label">الديون</div></div>
+                                <div class="stat-card"><div class="stat-number">${exp.toFixed(2)}</div><div class="stat-label">المصروفات</div></div>
+                                <div class="stat-card"><div class="stat-number">${(paid - exp).toFixed(2)}</div><div class="stat-label">صافي الشهر</div></div>
+                            </div>
+                            <div style="margin-top:12px;">
+                                <h4>تفاصيل المدفوعات:</h4>
+                                <div class="table-container">
+                                    <table>
+                                        <thead><tr><th>الشقة</th><th>الساكن</th><th>المبلغ</th><th>الحالة</th></tr></thead>
+                                        <tbody>
+                                            ${payments.length === 0 ? `
+                                                <tr><td colspan="4" style="text-align:center;padding:15px;">لا توجد مدفوعات هذا الشهر</td></tr>
+                                            ` : payments.map(p => `
+                                                <tr>
+                                                    <td>${p.apartment_number}</td>
+                                                    <td>${p.resident_name}</td>
+                                                    <td>${p.paid.toFixed(2)}</td>
+                                                    <td><span class="badge ${p.status === 'مدفوع' ? 'paid' : 'partial'}">${p.status}</span></td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            // ============================================================
+            // 2.12 الإعدادات
+            // ============================================================
+            renderSettings() {
+                const container = document.getElementById('page-settings');
+                const s = AppData.settings;
+
+                container.innerHTML = `
+                            <div class="card">
+                                <div class="card-header"><h3>⚙️ إعدادات النظام</h3></div>
+                                <form id="settingsForm" onsubmit="UIController.saveSettings(event)">
+                                    <div class="form-row">
+                                        <div class="form-group"><label>اسم العقار</label><input type="text" id="setBuildingName" value="${s.buildingName || ''}"></div>
+                                        <div class="form-group"><label>عنوان العقار</label><input type="text" id="setBuildingAddress" value="${s.buildingAddress || ''}"></div>
+                                        <div class="form-group"><label>الهاتف</label><input type="text" id="setPhone" value="${s.phone || ''}"></div>
+                                        <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="setEmail" value="${s.email || ''}"></div>
+                                    </div>
+                                    <h4 style="margin:16px 0 12px;">💰 رسوم الصيانة</h4>
+                                    <div class="form-row">
+                                        <div class="form-group"><label>مالك + أسانسير</label><input type="number" id="setFeeOwnerElev" value="${s.feeOwnerElevator || 170}"></div>
+                                        <div class="form-group"><label>مالك - أسانسير</label><input type="number" id="setFeeOwnerNoElev" value="${s.feeOwnerNoElevator || 150}"></div>
+                                        <div class="form-group"><label>مستأجر</label><input type="number" id="setFeeTenant" value="${s.feeTenant || 220}"></div>
+                                        <div class="form-group"><label>مغلق</label><input type="number" id="setFeeClosed" value="${s.feeClosed || 0}"></div>
+                                    </div>
+                                    <h4 style="margin:16px 0 12px;">🧾 إعدادات الإيصالات</h4>
+                                    <div class="form-row">
+                                        <div class="form-group"><label>بادئة رقم الإيصال</label><input type="text" id="setReceiptPrefix" value="${s.receiptPrefix || 'REC'}"></div>
+                                        <div class="form-group"><label>عنوان الإيصال</label><input type="text" id="setReceiptTitle" value="${s.receiptTitle || 'إيصال الصيانة الشهرية'}"></div>
+                                        <div class="form-group"><label>تذييل الإيصال</label><input type="text" id="setReceiptFooter" value="${s.receiptFooter || 'شكراً لتعاونكم'}"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>عدد الإيصالات في الصفحة</label>
+                                        <select id="setReceiptsPerPage">
+                                            <option value="1" ${s.receiptsPerPage === 1 ? 'selected' : ''}>1</option>
+                                            <option value="2" ${s.receiptsPerPage === 2 ? 'selected' : ''}>2</option>
+                                            <option value="3" ${s.receiptsPerPage === 3 ? 'selected' : ''}>3</option>
+                                            <option value="4" ${s.receiptsPerPage === 4 ? 'selected' : ''}>4</option>
+                                            <option value="6" ${s.receiptsPerPage === 6 ? 'selected' : ''}>6</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">💾 حفظ الإعدادات</button>
+                                </form>
+                            </div>
+                        `;
+            },
+
+            saveSettings(e) {
+                e.preventDefault();
+                AppData.settings.buildingName = document.getElementById('setBuildingName').value;
+                AppData.settings.buildingAddress = document.getElementById('setBuildingAddress').value;
+                AppData.settings.phone = document.getElementById('setPhone').value;
+                AppData.settings.email = document.getElementById('setEmail').value;
+                AppData.settings.feeOwnerElevator = parseFloat(document.getElementById('setFeeOwnerElev').value) || 170;
+                AppData.settings.feeOwnerNoElevator = parseFloat(document.getElementById('setFeeOwnerNoElev').value) || 150;
+                AppData.settings.feeTenant = parseFloat(document.getElementById('setFeeTenant').value) || 220;
+                AppData.settings.feeClosed = parseFloat(document.getElementById('setFeeClosed').value) || 0;
+                AppData.settings.receiptPrefix = document.getElementById('setReceiptPrefix').value || 'REC';
+                AppData.settings.receiptTitle = document.getElementById('setReceiptTitle').value || 'إيصال الصيانة الشهرية';
+                AppData.settings.receiptFooter = document.getElementById('setReceiptFooter').value || 'شكراً لتعاونكم';
+                AppData.settings.receiptsPerPage = parseInt(document.getElementById('setReceiptsPerPage').value) || 2;
+
+                AppData.recalculateAllAmounts();
+                AppData.save();
+                this.showToast('تم حفظ الإعدادات بنجاح', 'success');
+            },
+
+            // ============================================================
+            // 2.13 النسخ الاحتياطي
+            // ============================================================
+            renderBackup() {
+                const container = document.getElementById('page-backup');
+                container.innerHTML = `
+                            <div class="card">
+                                <div class="card-header"><h3>💾 النسخ الاحتياطي واستعادة البيانات</h3></div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                                    <div style="background:var(--bg);border-radius:var(--radius);padding:20px;text-align:center;border:2px dashed var(--border);">
+                                        <div style="font-size:48px;">📥</div>
+                                        <h4 style="margin:8px 0;">تحميل نسخة احتياطية</h4>
+                                        <p style="font-size:13px;color:var(--text-light);margin-bottom:12px;">تحميل جميع البيانات في ملف JSON</p>
+                                        <button class="btn btn-primary" onclick="UIController.downloadBackup()">📥 تحميل</button>
+                                    </div>
+                                    <div style="background:var(--bg);border-radius:var(--radius);padding:20px;text-align:center;border:2px dashed var(--border);">
+                                        <div style="font-size:48px;">📤</div>
+                                        <h4 style="margin:8px 0;">استعادة من نسخة احتياطية</h4>
+                                        <p style="font-size:13px;color:var(--text-light);margin-bottom:12px;">استعادة البيانات من ملف JSON</p>
+                                        <input type="file" id="restoreFile" accept=".json" style="display:none;" onchange="UIController.restoreBackup(event)">
+                                        <button class="btn btn-success" onclick="document.getElementById('restoreFile').click()">📤 اختيار ملف</button>
+                                    </div>
+                                </div>
+                                <div style="margin-top:20px;padding:16px;background:var(--bg);border-radius:var(--radius);">
+                                    <h4>📊 معلومات النسخة الاحتياطية</h4>
+                                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px;">
+                                        <div><strong>الشقق:</strong> ${AppData.apartments.length}</div>
+                                        <div><strong>المدفوعات:</strong> ${AppData.payments.length}</div>
+                                        <div><strong>الديون:</strong> ${AppData.debts.length}</div>
+                                        <div><strong>المصروفات:</strong> ${AppData.expenses.length}</div>
+                                        <div><strong>سجل التعديلات:</strong> ${AppData.auditLogs.length}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+            },
+
+            downloadBackup() {
+                const data = {
+                    apartments: AppData.apartments,
+                    payments: AppData.payments,
+                    debts: AppData.debts,
+                    expenses: AppData.expenses,
+                    specialCharges: AppData.specialCharges,
+                    funds: AppData.funds,
+                    fundTransactions: AppData.fundTransactions,
+                    receipts: AppData.receipts,
+                    receiptTemplates: AppData.receiptTemplates,
+                    notifications: AppData.notifications,
+                    auditLogs: AppData.auditLogs,
+                    settings: AppData.settings,
+                    exportedAt: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                this.showToast('تم تحميل النسخة الاحتياطية', 'success');
+            },
+
+            restoreBackup(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (!data.apartments) throw new Error('بيانات غير صالحة');
+                        AppData.apartments = data.apartments || [];
+                        AppData.payments = data.payments || [];
+                        AppData.debts = data.debts || [];
+                        AppData.expenses = data.expenses || [];
+                        AppData.specialCharges = data.specialCharges || [];
+                        AppData.funds = data.funds || [];
+                        AppData.fundTransactions = data.fundTransactions || [];
+                        AppData.receipts = data.receipts || [];
+                        AppData.receiptTemplates = data.receiptTemplates || [];
+                        AppData.notifications = data.notifications || [];
+                        AppData.auditLogs = data.auditLogs || [];
+                        AppData.settings = data.settings || {};
+                        AppData.save();
+                        this.showToast('تم استعادة البيانات بنجاح', 'success');
+                        this.renderPage(this.currentPage);
+                    } catch (err) {
+                        this.showToast('خطأ في قراءة الملف', 'error');
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            },
+
+            // ============================================================
+            // 2.14 الإشعارات
+            // ============================================================
+            renderNotifications() {
+                const container = document.getElementById('notificationsList');
+                const badge = document.getElementById('notifBadge');
+                const unread = AppData.notifications.filter(n => !n.read).length;
+
+                badge.textContent = unread;
+                badge.style.display = unread > 0 ? 'inline-block' : 'none';
+
+                container.innerHTML = AppData.notifications.slice(0, 20).map(n => `
+                            <div class="notification-item ${n.type}" onclick="UIController.markNotificationRead('${n.id}')">
+                                <span class="notif-text">📌 ${n.title}: ${n.message}</span>
+                                <span class="notif-time">${new Date(n.created_at).toLocaleTimeString('ar-EG')}</span>
+                                <button class="notif-dismiss" onclick="event.stopPropagation();UIController.dismissNotification('${n.id}')">✕</button>
+                            </div>
+                        `).join('') || '<div style="text-align:center;padding:20px;color:var(--text-light);">لا توجد إشعارات</div>';
+            },
+
+            markNotificationRead(id) {
+                const n = AppData.notifications.find(n => n.id === id);
+                if (n) { n.read = true;
+                    AppData.save();
+                    this.renderNotifications(); }
+            },
+
+            dismissNotification(id) {
+                AppData.notifications = AppData.notifications.filter(n => n.id !== id);
+                AppData.save();
+                this.renderNotifications();
+            },
+
+            clearAllNotifications() {
+                AppData.notifications = [];
+                AppData.save();
+                this.renderNotifications();
+                document.getElementById('notificationsPanel').style.display = 'none';
+            },
+
+            toggleNotifications() {
+                const panel = document.getElementById('notificationsPanel');
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+                if (panel.style.display === 'block') {
+                    AppData.notifications.forEach(n => n.read = true);
+                    AppData.save();
+                    this.renderNotifications();
+                }
+            },
+
+            checkNotifications() {
+                const now = new Date();
+                AppData.debts.forEach(d => {
+                    if (d.status === 'مسددة بالكامل') return;
+                    if (new Date(d.due_date) < now) {
+                        AppData.addNotification('⚠️ مديونية متأخرة',
+                            `الشقة ${d.apartment_number} - ${d.description} (${d.remaining.toFixed(2)} جنيه)`,
+                            'urgent');
+                    }
+                });
+            },
+
+            // ============================================================
+            // 2.15 النوافذ المنبثقة
+            // ============================================================
+            showModal(html) {
+                document.getElementById('modalContainer').innerHTML = `
+                            <div class="modal-overlay open" onclick="if(event.target===this) UIController.closeModal()">
+                                <div class="modal">${html}</div>
+                            </div>
+                        `;
+            },
+
+            closeModal() {
+                document.getElementById('modalContainer').innerHTML = '';
+            },
+
+            // ============================================================
+            // 2.16 إضافة شقة
+            // ============================================================
+            showAddApartmentModal() {
+                const floors = ['البدروم', 'الأول', 'الثانى', 'الثالث', 'الرابع', 'الخامس',
+                    'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر',
+                    'الحادى عشر', 'الثانى عشر', 'الثالث عشر'
+                ];
+
+                this.showModal(`
+                            <div class="modal-header"><h2>➕ إضافة شقة جديدة</h2><button class="modal-close" onclick="UIController.closeModal()">✕</button></div>
+                            <form id="addApartmentForm" onsubmit="UIController.addApartment(event)">
+                                <div class="form-row">
+                                    <div class="form-group"><label>الدور</label>
+                                        <select id="aptFloor" required>${floors.map(f => `<option value="${f}">${f}</option>`).join('')}</select>
+                                    </div>
+                                    <div class="form-group"><label>رقم الشقة</label><input type="text" id="aptNumber" required></div>
+                                    <div class="form-group"><label>مكان الشقة</label><input type="text" id="aptLocation" placeholder="يمين/يسار السلم"></div>
+                                    <div class="form-group"><label>اسم الساكن</label><input type="text" id="aptResident" required></div>
+                                    <div class="form-group"><label>اسم المالك</label><input type="text" id="aptOwner"></div>
+                                    <div class="form-group"><label>رقم الهاتف</label><input type="text" id="aptPhone"></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>نوع الساكن</label>
+                                        <select id="aptType" required>
+                                            <option value="مالك">مالك</option><option value="مستأجر">مستأجر</option><option value="مغلق">مغلق</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>حالة الشقة</label>
+                                        <select id="aptStatus" required>
+                                            <option value="ساكنة">ساكنة</option><option value="مغلقة">مغلقة</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>استخدام الأسانسير</label>
+                                        <select id="aptElevator"><option value="نعم">نعم</option><option value="لا">لا</option></select>
+                                    </div>
+                                    <div class="form-group"><label>ملاحظات</label><input type="text" id="aptNotes"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">💾 حفظ</button>
+                                    <button type="button" class="btn btn-outline" onclick="UIController.closeModal()">إلغاء</button>
+                                </div>
+                            </form>
+                        `);
+            },
+
+            addApartment(e) {
+                e.preventDefault();
+                const apt = {
+                    floor: document.getElementById('aptFloor').value,
+                    number: document.getElementById('aptNumber').value,
+                    location: document.getElementById('aptLocation').value || '',
+                    resident: document.getElementById('aptResident').value,
+                    owner: document.getElementById('aptOwner').value || document.getElementById('aptResident').value,
+                    type: document.getElementById('aptType').value,
+                    status: document.getElementById('aptStatus').value,
+                    elevator: document.getElementById('aptElevator').value,
+                    phone: document.getElementById('aptPhone').value || '',
+                    notes: document.getElementById('aptNotes').value || ''
+                };
+                AppData.addApartment(apt);
+                this.closeModal();
+                this.renderPage('apartments');
+                this.showToast('تم إضافة الشقة بنجاح', 'success');
+            },
+
+            // ============================================================
+            // 2.17 تعديل شقة
+            // ============================================================
+            showEditApartmentModal(id) {
+                const apt = AppData.getApartment(id);
+                if (!apt) return;
+                const floors = ['البدروم', 'الأول', 'الثانى', 'الثالث', 'الرابع', 'الخامس',
+                    'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر',
+                    'الحادى عشر', 'الثانى عشر', 'الثالث عشر'
+                ];
+
+                this.showModal(`
+                            <div class="modal-header"><h2>✏️ تعديل الشقة ${apt.number}</h2><button class="modal-close" onclick="UIController.closeModal()">✕</button></div>
+                            <form id="editApartmentForm" onsubmit="UIController.editApartment(event)">
+                                <input type="hidden" id="editAptId" value="${apt.id}">
+                                <div class="form-row">
+                                    <div class="form-group"><label>الدور</label>
+                                        <select id="editAptFloor" required>${floors.map(f => `<option value="${f}" ${f === apt.floor ? 'selected' : ''}>${f}</option>`).join('')}</select>
+                                    </div>
+                                    <div class="form-group"><label>رقم الشقة</label><input type="text" id="editAptNumber" value="${apt.number}" required></div>
+                                    <div class="form-group"><label>مكان الشقة</label><input type="text" id="editAptLocation" value="${apt.location || ''}"></div>
+                                    <div class="form-group"><label>اسم الساكن</label><input type="text" id="editAptResident" value="${apt.resident}" required></div>
+                                    <div class="form-group"><label>اسم المالك</label><input type="text" id="editAptOwner" value="${apt.owner || ''}"></div>
+                                    <div class="form-group"><label>رقم الهاتف</label><input type="text" id="editAptPhone" value="${apt.phone || ''}"></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>نوع الساكن</label>
+                                        <select id="editAptType" required>
+                                            <option value="مالك" ${apt.type === 'مالك' ? 'selected' : ''}>مالك</option>
+                                            <option value="مستأجر" ${apt.type === 'مستأجر' ? 'selected' : ''}>مستأجر</option>
+                                            <option value="مغلق" ${apt.type === 'مغلق' ? 'selected' : ''}>مغلق</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>حالة الشقة</label>
+                                        <select id="editAptStatus" required>
+                                            <option value="ساكنة" ${apt.status === 'ساكنة' ? 'selected' : ''}>ساكنة</option>
+                                            <option value="مغلقة" ${apt.status === 'مغلقة' ? 'selected' : ''}>مغلقة</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>استخدام الأسانسير</label>
+                                        <select id="editAptElevator">
+                                            <option value="نعم" ${apt.elevator === 'نعم' ? 'selected' : ''}>نعم</option>
+                                            <option value="لا" ${apt.elevator === 'لا' ? 'selected' : ''}>لا</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>ملاحظات</label><input type="text" id="editAptNotes" value="${apt.notes || ''}"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">💾 حفظ</button>
+                                    <button type="button" class="btn btn-outline" onclick="UIController.closeModal()">إلغاء</button>
+                                </div>
+                            </form>
+                        `);
+            },
+
+            editApartment(e) {
+                e.preventDefault();
+                const id = document.getElementById('editAptId').value;
+                const data = {
+                    floor: document.getElementById('editAptFloor').value,
+                    number: document.getElementById('editAptNumber').value,
+                    location: document.getElementById('editAptLocation').value || '',
+                    resident: document.getElementById('editAptResident').value,
+                    owner: document.getElementById('editAptOwner').value || document.getElementById('editAptResident').value,
+                    type: document.getElementById('editAptType').value,
+                    status: document.getElementById('editAptStatus').value,
+                    elevator: document.getElementById('editAptElevator').value,
+                    phone: document.getElementById('editAptPhone').value || '',
+                    notes: document.getElementById('editAptNotes').value || ''
+                };
+                AppData.updateApartment(id, data);
+                this.closeModal();
+                this.renderPage('apartments');
+                this.showToast('تم تعديل الشقة بنجاح', 'success');
+            },
+
+            deleteApartment(id) {
+                if (!confirm('هل أنت متأكد من حذف هذه الشقة؟')) return;
+                AppData.deleteApartment(id);
+                this.renderPage('apartments');
+                this.showToast('تم حذف الشقة', 'success');
+            },
+
+            // ============================================================
+            // 2.18 إضافة دفعة
+            // ============================================================
+            showAddPaymentModal() {
+                const apts = AppData.apartments;
+                this.showModal(`
+                            <div class="modal-header"><h2>💰 تسجيل دفعة</h2><button class="modal-close" onclick="UIController.closeModal()">✕</button></div>
+                            <form id="addPaymentForm" onsubmit="UIController.addPayment(event)">
+                                <div class="form-group">
+                                    <label>اختر الشقة</label>
+                                    <select id="payApartment" required>
+                                        <option value="">-- اختر الشقة --</option>
+                                        ${apts.map(a => `<option value="${a.id}" data-amount="${a.amount || 0}" data-resident="${a.resident}" data-number="${a.number}">${a.number} - ${a.resident}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>نوع الدفعة</label>
+                                        <select id="payType" required>
+                                            <option value="صيانة شهرية">🔧 صيانة شهرية</option>
+                                            <option value="إيجار شهري">💰 إيجار شهري</option>
+                                            <option value="إيجار مقدم">💵 إيجار مقدم</option>
+                                            <option value="تأمين إيجار">🛡️ تأمين إيجار</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>المبلغ المطلوب</label><input type="number" id="payAmount" step="0.01" required></div>
+                                    <div class="form-group"><label>المبلغ المدفوع</label><input type="number" id="payPaid" step="0.01" required></div>
+                                    <div class="form-group"><label>حالة السداد</label>
+                                        <select id="payStatus" required>
+                                            <option value="مدفوع">✅ مدفوع</option>
+                                            <option value="غير مدفوع">❌ غير مدفوع</option>
+                                            <option value="دفع جزئي">⚠️ دفع جزئي</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>طريقة الدفع</label>
+                                        <select id="payMethod">
+                                            <option value="نقدي">💵 نقدي</option>
+                                            <option value="تحويل بنكي">🏦 تحويل بنكي</option>
+                                            <option value="فودافون كاش">📱 فودافون كاش</option>
+                                            <option value="انستاباي">💳 انستاباي</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>الشهر</label>
+                                        <select id="payMonth" required>
+                                            ${['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'].map(m => 
+                                                `<option value="${m}" ${m === AppData.currentMonth ? 'selected' : ''}>${m}</option>`
+                                            ).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>السنة</label><input type="number" id="payYear" value="${AppData.currentYear}"></div>
+                                    <div class="form-group" style="grid-column:1/-1;"><label>ملاحظات</label><input type="text" id="payNotes"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-success">💰 تسجيل</button>
+                                    <button type="button" class="btn btn-outline" onclick="UIController.closeModal()">إلغاء</button>
+                                </div>
+                            </form>
+                        `);
+            },
+
+            addPayment(e) {
+                e.preventDefault();
+                const apt = AppData.getApartment(document.getElementById('payApartment').value);
+                if (!apt) { this.showToast('الرجاء اختيار شقة', 'error'); return; }
+
+                const payment = {
+                    apartment_id: apt.id,
+                    apartment_number: apt.number,
+                    resident_name: apt.resident,
+                    amount: parseFloat(document.getElementById('payAmount').value) || 0,
+                    paid: parseFloat(document.getElementById('payPaid').value) || 0,
+                    payment_type: document.getElementById('payType').value,
+                    status: document.getElementById('payStatus').value,
+                    method: document.getElementById('payMethod').value || 'نقدي',
+                    month: document.getElementById('payMonth').value,
+                    year: parseInt(document.getElementById('payYear').value),
+                    notes: document.getElementById('payNotes').value || ''
+                };
+
+                AppData.addPayment(payment);
+                this.closeModal();
+                this.renderPage('payments');
+                this.showToast(`تم تسجيل دفعة للشقة ${apt.number}`, 'success');
+            },
+
+            // ============================================================
+            // 2.19 إضافة مديونية
+            // ============================================================
+            showAddDebtModal() {
+                const apts = AppData.apartments;
+                const today = new Date().toISOString().split('T')[0];
+
+                this.showModal(`
+                            <div class="modal-header"><h2>📋 تسجيل مديونية</h2><button class="modal-close" onclick="UIController.closeModal()">✕</button></div>
+                            <form id="addDebtForm" onsubmit="UIController.addDebt(event)">
+                                <div class="form-group">
+                                    <label>اختر الشقة</label>
+                                    <select id="debtApartment" required>
+                                        <option value="">-- اختر الشقة --</option>
+                                        ${apts.map(a => `<option value="${a.id}">${a.number} - ${a.resident}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>نوع المديونية</label>
+                                        <select id="debtType" required>
+                                            <option value="إيجار متأخر">💰 إيجار متأخر</option>
+                                            <option value="صيانة">🔧 صيانة</option>
+                                            <option value="كهرباء">⚡ كهرباء</option>
+                                            <option value="مياه">💧 مياه</option>
+                                            <option value="أسانسير">🛗 أسانسير</option>
+                                            <option value="إصلاحات">🔨 إصلاحات</option>
+                                            <option value="أخرى">❓ أخرى</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>المبلغ</label><input type="number" id="debtAmount" step="0.01" required></div>
+                                    <div class="form-group"><label>الشهر</label>
+                                        <select id="debtMonth">
+                                            ${['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'].map(m => 
+                                                `<option value="${m}">${m}</option>`
+                                            ).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>السنة</label><input type="number" id="debtYear" value="${AppData.currentYear}"></div>
+                                    <div class="form-group"><label>تاريخ الاستحقاق</label><input type="date" id="debtDueDate" value="${today}" required></div>
+                                    <div class="form-group" style="grid-column:1/-1;"><label>الوصف</label><input type="text" id="debtDescription" required></div>
+                                    <div class="form-group" style="grid-column:1/-1;"><label>ملاحظات</label><input type="text" id="debtNotes"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">📋 تسجيل</button>
+                                    <button type="button" class="btn btn-outline" onclick="UIController.closeModal()">إلغاء</button>
+                                </div>
+                            </form>
+                        `);
+            },
+
+            addDebt(e) {
+                e.preventDefault();
+                const apt = AppData.getApartment(document.getElementById('debtApartment').value);
+                if (!apt) { this.showToast('الرجاء اختيار شقة', 'error'); return; }
+
+                const debt = {
+                    apartment_id: apt.id,
+                    apartment_number: apt.number,
+                    resident_name: apt.resident,
+                    debt_type: document.getElementById('debtType').value,
+                    amount: parseFloat(document.getElementById('debtAmount').value) || 0,
+                    month: document.getElementById('debtMonth').value,
+                    year: parseInt(document.getElementById('debtYear').value),
+                    due_date: document.getElementById('debtDueDate').value,
+                    description: document.getElementById('debtDescription').value,
+                    notes: document.getElementById('debtNotes').value || ''
+                };
+
+                AppData.addDebt(debt);
+                this.closeModal();
+                this.renderPage('debts');
+                this.showToast(`تم تسجيل مديونية للشقة ${apt.number}`, 'success');
+            },
+
+            // ============================================================
+            // 2.20 سداد مديونية
+            // ============================================================
+            showPayDebtModal(debtId) {
+                const debt = AppData.debts.find(d => d.id === debtId);
+                if (!debt) return;
+
+                this.showModal(`
+                            <div class="modal-header"><h2>💰 سداد مديونية</h2><button class="modal-close" onclick="UIController.closeModal()">✕</button></div>
+                            <div style="background:var(--bg);padding:12px;border-radius:6px;margin-bottom:12px;">
+                                <div><strong>الشقة:</strong> ${debt.apartment_number}</div>
+                                <div><strong>الساكن:</strong> ${debt.resident_name}</div>
+                                <div><strong>النوع:</strong> ${debt.debt_type}</div>
+                                <div><strong>المتبقي:</strong> <span style="color:var(--danger);font-weight:700;">${debt.remaining.toFixed(2)} جنيه</span></div>
+                            </div>
+                            <form id="payDebtForm" onsubmit="UIController.payDebt(event)">
+                                <input type="hidden" id="payDebtId" value="${debt.id}">
+                                <div class="form-row">
+                                    <div class="form-group"><label>مبلغ السداد</label><input type="number" id="payDebtAmount" step="0.01" max="${debt.remaining}" value="${debt.remaining}" required></div>
+                                    <div class="form-group"><label>طريقة الدفع</label>
+                                        <select id="payDebtMethod">
+                                            <option value="كاش">💵 كاش</option>
+                                            <option value="تحويل بنكي">🏦 تحويل بنكي</option>
+                                            <option value="فودافون كاش">📱 فودافون كاش</option>
+                                            <option value="انستاباي">💳 انستاباي</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="grid-column:1/-1;"><label>ملاحظات</label><input type="text" id="payDebtNotes"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-success">💰 سداد</button>
+                                    <button type="button" class="btn btn-outline" onclick="UIController.closeModal()">إلغاء</button>
+                                </div>
+                            </form>
+                        `);
+            },
+
+            payDebt(e) {
+                e.preventDefault();
+                const debtId = document.getElementById('payDebtId').value;
+                const amount = parseFloat(document.getElementById('payDebtAmount').value) || 0;
+                const method = document.getElementById('payDebtMethod').value;
+
+                const debt = AppData.debts.find(d => d.id === debtId);
+                if (!debt || amount <= 0 || amount > debt.remaining) {
+                    this.showToast('مبلغ غير صحيح', 'error');
+                    return;
+                }
+
+                AppData.payDebt(debtId, amount, method);
+                this.closeModal();
+                this.renderPage('debts');
+                this.showToast(`تم سداد ${amount} من المديونية`, 'success');
+            },
+
+            deleteDebt(id) {
+                if (!confirm('هل أنت متأكد من حذف هذه المديونية؟')) return;
+                AppData.debts = AppData.debts.filter(d => d.id !== id);
+                AppData.save();
+                this.renderPage('debts');
+                this.showToast('تم حذف المديونية', 'success');
+            },
+
+            // ============================================================
+            // 2.21 إضافة مصروف
+            // ============================================================
+            showAddExpenseModal() {
+                this.showModal(`
+                            <div class="modal-header"><h2>💸 إضافة مصروف</h2><button class="modal-close" onclick="UIController.closeModal()">✕</button></div>
+                            <form id="addExpenseForm" onsubmit="UIController.addExpense(event)">
+                                <div class="form-row">
+                                    <div class="form-group"><label>نوع المصروف</label>
+                                        <select id="expenseType" required>
+                                            <option value="كهرباء">⚡ كهرباء</option>
+                                            <option value="مياه">💧 مياه</option>
+                                            <option value="أسانسير">🛗 أسانسير</option>
+                                            <option value="مواتير">🔧 مواتير</option>
+                                            <option value="سباكة">🔨 سباكة</option>
+                                            <option value="نظافة">🧹 نظافة</option>
+                                            <option value="صيانة">🔧 صيانة</option>
+                                            <option value="إصلاحات">🔨 إصلاحات</option>
+                                            <option value="أخرى">❓ أخرى</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>المبلغ</label><input type="number" id="expenseAmount" step="0.01" required></div>
+                                    <div class="form-group"><label>الشهر</label>
+                                        <select id="expenseMonth">
+                                            ${['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'].map(m => 
+                                                `<option value="${m}" ${m === AppData.currentMonth ? 'selected' : ''}>${m}</option>`
+                                            ).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>السنة</label><input type="number" id="expenseYear" value="${AppData.currentYear}"></div>
+                                    <div class="form-group" style="grid-column:1/-1;"><label>الوصف</label><input type="text" id="expenseDescription" required></div>
+                                    <div class="form-group" style="grid-column:1/-1;"><label>طريقة الدفع</label>
+                                        <select id="expenseMethod">
+                                            <option value="كاش">💵 كاش</option>
+                                            <option value="تحويل بنكي">🏦 تحويل بنكي</option>
+                                            <option value="أخرى">❓ أخرى</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">💾 حفظ</button>
+                                    <button type="button" class="btn btn-outline" onclick="UIController.closeModal()">إلغاء</button>
+                                </div>
+                            </form>
+                        `);
+            },
+
+            addExpense(e) {
+                e.preventDefault();
+                const expense = {
+                    expense_type: document.getElementById('expenseType').value,
+                    amount: parseFloat(document.getElementById('expenseAmount').value) || 0,
+                    month: document.getElementById('expenseMonth').value,
+                    year: parseInt(document.getElementById('expenseYear').value),
+                    description: document.getElementById('expenseDescription').value,
+                    method: document.getElementById('expenseMethod').value,
+                    date: new Date().toISOString()
+                };
+                AppData.addExpense(expense);
+                this.closeModal();
+                this.renderPage('expenses');
+                this.showToast('تم إضافة المصروف', 'success');
+            },
+
+            deleteExpense(id) {
+                if (!confirm('هل أنت متأكد من حذف هذا المصروف؟')) return;
+                AppData.expenses = AppData.expenses.filter(e => e.id !== id);
+                AppData.save();
+                this.renderPage('expenses');
+                this.showToast('تم حذف المصروف', 'success');
+            },
+
+            // ============================================================
+            // 2.22 إضافة رسوم خاصة
+            // ============================================================
+            showAddSpecialChargeModal() {
+                this.showModal(`
+                            <div class="modal-header"><h2>💵 إضافة رسوم خاصة</h2><button class="modal-close" onclick="UIController.closeModal()">✕</button></div>
+                            <form id="addSpecialChargeForm" onsubmit="UIController.addSpecialCharge(event)">
+                                <div class="form-row">
+                                    <div class="form-group"><label>اسم الرسوم</label><input type="text" id="chargeName" required></div>
+                                    <div class="form-group"><label>السبب</label><input type="text" id="chargeReason" required></div>
+                                    <div class="form-group"><label>المبلغ</label><input type="number" id="chargeAmount" step="0.01" required></div>
+                                    <div class="form-group"><label>تاريخ الاستحقاق</label><input type="date" id="chargeDueDate" required></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">💾 حفظ</button>
+                                    <button type="button" class="btn btn-outline" onclick="UIController.closeModal()">إلغاء</button>
+                                </div>
+                            </form>
+                        `);
+            },
+
+            addSpecialCharge(e) {
+                e.preventDefault();
+                const charge = {
+                    name: document.getElementById('chargeName').value,
+                    reason: document.getElementById('chargeReason').value,
+                    amount: parseFloat(document.getElementById('chargeAmount').value) || 0,
+                    due_date: document.getElementById('chargeDueDate').value,
+                    status: 'غير مدفوع',
+                    created_at: new Date().toISOString()
+                };
+                charge.id = 'CHG' + Date.now();
+                AppData.specialCharges.push(charge);
+                AppData.save();
+                this.closeModal();
+                this.renderPage('special-charges');
+                this.showToast('تم إضافة الرسوم الخاصة', 'success');
+            },
+
+            deleteSpecialCharge(id) {
+                if (!confirm('هل أنت متأكد من حذف هذه الرسوم؟')) return;
+                AppData.specialCharges = AppData.specialCharges.filter(c => c.id !== id);
+                AppData.save();
+                this.renderPage('special-charges');
+                this.showToast('تم حذف الرسوم', 'success');
+            },
+
+            // ============================================================
+            // 2.23 إضافة حركة صندوق
+            // ============================================================
+            showAddFundTransactionModal() {
+                this.showModal(`
+                            <div class="modal-header"><h2>🏦 إضافة حركة صندوق</h2><button class="modal-close" onclick="UIController.closeModal()">✕</button></div>
+                            <form id="addFundTransactionForm" onsubmit="UIController.addFundTransaction(event)">
+                                <div class="form-group">
+                                    <label>اختر الصندوق</label>
+                                    <select id="fundSelect" required>
+                                        ${AppData.funds.map(f => `<option value="${f.id}">${f.name} (${f.balance.toFixed(2)} جنيه)</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>نوع الحركة</label>
+                                        <select id="fundTransType" required>
+                                            <option value="إيراد">💰 إيراد</option>
+                                            <option value="مصروف">💸 مصروف</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>المبلغ</label><input type="number" id="fundTransAmount" step="0.01" required></div>
+                                    <div class="form-group" style="grid-column:1/-1;"><label>البيان</label><input type="text" id="fundTransDescription" required></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">💾 حفظ</button>
+                                    <button type="button" class="btn btn-outline" onclick="UIController.closeModal()">إلغاء</button>
+                                </div>
+                            </form>
+                        `);
+            },
+
+            addFundTransaction(e) {
+                e.preventDefault();
+                const transaction = {
+                    fund_id: document.getElementById('fundSelect').value,
+                    type: document.getElementById('fundTransType').value,
+                    amount: parseFloat(document.getElementById('fundTransAmount').value) || 0,
+                    description: document.getElementById('fundTransDescription').value
+                };
+                AppData.addFundTransaction(transaction);
+                this.closeModal();
+                this.renderPage('funds');
+                this.showToast('تم إضافة الحركة', 'success');
+            },
+
+            // ============================================================
+            // 2.24 أدوات مساعدة
+            // ============================================================
+            updateDateTime() {
+                const now = new Date();
+                document.getElementById('currentDateTime').textContent = now.toLocaleDateString('ar-EG', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'long',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            },
+
+            toggleDarkMode() {
+                document.body.classList.toggle('dark');
+                localStorage.setItem('darkMode', document.body.classList.contains('dark') ? 'true' : 'false');
+            },
+
+            toggleSidebar() {
+                document.getElementById('sidebar').classList.toggle('closed');
+                document.getElementById('mainContent').classList.toggle('expanded');
+            },
+
+            recalculateAll() {
+                AppData.recalculateAllAmounts();
+                AppData.save();
+                this.renderPage('apartments');
+                this.showToast('تم إعادة حساب جميع الرسوم', 'success');
+            },
+
+            showToast(message, type = 'info') {
+                const existing = document.querySelector('.toast');
+                if (existing) existing.remove();
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+            }
+        };
+
+        // ============================================================
+        // 3. EXPOSE GLOBALLY
+        // ============================================================
+        window.toggleDarkMode = function() { UIController.toggleDarkMode(); };
+        window.toggleSidebar = function() { UIController.toggleSidebar(); };
+        window.toggleNotifications = function() { UIController.toggleNotifications(); };
+        window.clearAllNotifications = function() { UIController.clearAllNotifications(); };
+        window.showPage = function(page) { UIController.showPage(page); };
+
+        // ============================================================
+        // 4. INITIALIZE
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            UIController.init();
+            console.log('🏢 نظام إدارة العقار المتكامل');
+            console.log('📦 الشقق:', AppData.apartments.length);
+            console.log('💰 المدفوعات:', AppData.payments.length);
+            console.log('📋 الديون:', AppData.debts.length);
+            console.log('💸 المصروفات:', AppData.expenses.length);
+            console.log('📊 جاهز للاستخدام!');
+        });
+    </script>
+</body>
+</html>
