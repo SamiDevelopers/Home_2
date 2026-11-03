@@ -1,0 +1,129 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- دالة مساعدة: التحقق من الدور ----------
+    function hasRole(roles) {
+      return request.auth != null && request.auth.token.role in roles;
+    }
+
+    // ---------- المستخدمون ----------
+    match /users/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || hasRole(['admin', 'priest']));
+      allow write: if false; // الكتابة فقط عبر Cloud Functions (Admin SDK)
+    }
+
+    // ---------- طلبات القبول ----------
+    match /studentApplications/{appId} {
+      allow read: if hasRole(['admin', 'servant', 'priest']);
+      allow create: if hasRole(['admin', 'servant']);
+      allow update, delete: if false; // الانتقالات عبر Cloud Functions
+    }
+
+    // ---------- الدارسون ----------
+    match /students/{studentId} {
+      allow read: if hasRole(['admin', 'servant', 'priest', 'control']);
+      allow write: if hasRole(['admin', 'priest']);
+    }
+
+    // ---------- الدفعات والمحاضرات ----------
+    match /batches/{batchId} {
+      allow read: if hasRole(['admin', 'servant', 'priest', 'control']);
+      allow write: if hasRole(['admin', 'priest']);
+    }
+    match /lectures/{lectureId} {
+      allow read: if hasRole(['admin', 'servant', 'priest', 'control']);
+      allow write: if hasRole(['admin', 'priest']);
+    }
+    match /lectureChanges/{changeId} {
+      allow read: if hasRole(['admin', 'priest', 'control']);
+      allow create: if hasRole(['admin', 'priest']);
+      allow update, delete: if false;
+    }
+
+    // ---------- التسجيلات ----------
+    match /enrollments/{enrollId} {
+      allow read: if hasRole(['admin', 'servant', 'priest', 'control']);
+      allow write: if hasRole(['admin', 'priest']);
+    }
+
+    // ---------- الحضور ----------
+    match /attendance/{attId} {
+      allow read: if hasRole(['admin', 'servant', 'priest', 'control']);
+      allow create, update: if hasRole(['admin', 'servant', 'priest']);
+      allow delete: if false;
+    }
+
+    // ---------- النوتة الروحية ----------
+    match /spiritualNotebook/{entryId} {
+      allow read: if hasRole(['admin', 'servant', 'priest']);
+      allow create: if hasRole(['admin', 'priest', 'servant']);
+      allow update: if false;
+    }
+
+    // ---------- أعمال السنة ----------
+    match /annualAssessments/{assessmentId} {
+      allow read: if hasRole(['admin', 'servant', 'priest', 'control']);
+      allow write: if false; // فقط عبر Cloud Functions
+    }
+
+    // ---------- التنبيهات ----------
+    match /notifications/{notifId} {
+      allow read: if hasRole(['admin', 'priest', 'servant']);
+      allow write: if false;
+    }
+
+    // ---------- سجل التدقيق ----------
+    match /auditLogs/{logId} {
+      allow read: if hasRole(['admin', 'priest']);
+      allow write: if false; // فقط من Cloud Functions
+    }
+
+    // ---------- الإعدادات ----------
+    match /systemSettings/{settingId} {
+      allow read: if hasRole(['admin', 'priest']);
+      allow write: if false;
+    }
+
+    // ---------- القرارات الأكاديمية ----------
+    match /academicDecisions/{decisionId} {
+      allow read: if hasRole(['admin', 'priest', 'servant', 'control']);
+      allow create: if hasRole(['admin', 'priest']);
+      allow update, delete: if false;
+    }
+    match /graduationRecords/{recordId} {
+      allow read: if hasRole(['admin', 'priest', 'control']);
+      allow create: if hasRole(['admin', 'priest']);
+      allow update, delete: if false;
+    }
+    match /importJobs/{jobId} {
+      allow read: if hasRole(['admin', 'priest']);
+      allow create: if hasRole(['admin', 'priest']);
+      allow update, delete: if false;
+    }
+
+    // ---------- الامتحانات والنتائج ----------
+    match /exams/{examId} {
+      allow read: if hasRole(['admin', 'servant', 'priest', 'control']);
+      allow create, update: if hasRole(['admin', 'priest', 'control']);
+      allow delete: if false;
+    }
+    match /examResults/{resultId} {
+      allow read: if hasRole(['admin', 'servant', 'priest', 'control']);
+      allow create, update: if hasRole(['admin', 'priest', 'control']);
+      allow delete: if false;
+    }
+
+    // ---------- الخدام والتكليفات ----------
+    match /servants/{servantId} {
+      allow read: if hasRole(['admin', 'priest', 'servant']);
+      allow create, update: if hasRole(['admin', 'priest']);
+      allow delete: if false;
+    }
+
+    // ---------- منع الوصول الافتراضي ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

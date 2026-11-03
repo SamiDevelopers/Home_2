@@ -1,0 +1,26 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // صور الدارسين — 5 ميجابايت كحد أقصى، صور فقط
+    match /students/{studentId}/{fileName} {
+      allow read: if request.auth != null && request.auth.token.role in ['admin', 'servant', 'priest'];
+      allow write: if request.auth != null
+        && request.auth.token.role in ['admin', 'servant', 'priest']
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // مستندات القبول — 10 ميجابايت، PDF أو صور
+    match /applications/{appId}/{fileName} {
+      allow read: if request.auth != null && request.auth.token.role in ['admin', 'servant', 'priest'];
+      allow write: if request.auth != null
+        && request.auth.token.role in ['admin', 'servant']
+        && request.resource.size < 10 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType == 'application/pdf');
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

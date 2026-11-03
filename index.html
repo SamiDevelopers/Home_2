@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إعداد خدام — Khodam Management System</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230B1F3A'/%3E%3Cpath d='M28 12h8v14h14v8H36v18h-8V34H14v-8h14z' fill='%23C9A227'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+</head>
+<body>
+
+  <!-- ========== شاشة تسجيل الدخول ========== -->
+  <div id="login-screen" class="screen active">
+    <div class="login-card">
+      <div class="login-logo">✝</div>
+      <h1>نظام إعداد خدام</h1>
+      <p class="login-sub">Khodam Management System</p>
+      <div class="login-tabs" aria-label="نوع المستخدم">
+        <button type="button" class="login-tab active" data-login-tab="دارس">دارس / مسؤول</button>
+      </div>
+      <form id="login-form">
+        <label for="login-email">البريد الإلكتروني</label>
+        <input type="email" id="login-email" placeholder="البريد الإلكتروني" autocomplete="email" required>
+        <label for="login-password">كلمة المرور</label>
+        <input type="password" id="login-password" placeholder="كلمة المرور" autocomplete="current-password" required>
+        <button type="submit" id="login-btn" class="btn-primary">تسجيل الدخول</button>
+      </form>
+      <p id="login-error" class="error-text"></p>
+    </div>
+  </div>
+
+  <!-- ========== التطبيق الرئيسي ========== -->
+  <div id="app-screen" class="screen">
+    <!-- الشريط الجانبي -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo-icon">✝</span>
+        <h3>إعداد خدام</h3>
+      </div>
+      <nav id="main-nav">
+        <a href="#" data-page="dashboard" class="nav-link active"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span><span>لوحة التحكم</span></a>
+        <a href="#" data-page="admissions" class="nav-link"><span class="nav-icon"><i data-lucide="clipboard-check"></i></span><span>القبول والمقابلات</span></a>
+        <a href="#" data-page="students" class="nav-link"><span class="nav-icon"><i data-lucide="graduation-cap"></i></span><span>الدارسين والملفات</span></a>
+        <a href="#" data-page="batches" class="nav-link"><span class="nav-icon"><i data-lucide="layers-3"></i></span><span>الدفعات</span></a>
+        <a href="#" data-page="attendance" class="nav-link"><span class="nav-icon"><i data-lucide="calendar-check"></i></span><span>الحضور والغياب</span></a>
+        <a href="#" data-page="schedule" class="nav-link"><span class="nav-icon"><i data-lucide="calendar-days"></i></span><span>الجدول والمحاضرات</span></a>
+        <a href="#" data-page="notebook" class="nav-link"><span class="nav-icon"><i data-lucide="book-open"></i></span><span>النوتة والواجبات</span></a>
+        <a href="#" data-page="eligibility" class="nav-link"><span class="nav-icon"><i data-lucide="badge-check"></i></span><span>أهلية الامتحان</span></a>
+        <a href="#" data-page="assessments" class="nav-link"><span class="nav-icon"><i data-lucide="clipboard-list"></i></span><span>أعمال السنة</span></a>
+        <a href="#" data-page="exams" class="nav-link"><span class="nav-icon"><i data-lucide="notebook-tabs"></i></span><span>الامتحانات والنتائج</span></a>
+        <a href="#" data-page="servants" class="nav-link"><span class="nav-icon"><i data-lucide="users-round"></i></span><span>الخدام والتكليفات</span></a>
+        <a href="#" data-page="notifications" class="nav-link"><span class="nav-icon"><i data-lucide="bell"></i></span><span>الإشعارات</span></a>
+        <a href="#" data-page="reports" class="nav-link"><span class="nav-icon"><i data-lucide="file-chart-column"></i></span><span>التقارير والتصدير</span></a>
+        <a href="#" data-page="studentPortal" class="nav-link" id="nav-student-portal"><span class="nav-icon"><i data-lucide="user-round"></i></span><span>بوابة الدارس</span></a>
+        <a href="#" data-page="archive" class="nav-link" id="nav-archive"><span class="nav-icon"><i data-lucide="archive"></i></span><span>التخرج والأرشفة</span></a>
+        <a href="#" data-page="import" class="nav-link" id="nav-import"><span class="nav-icon"><i data-lucide="upload"></i></span><span>استيراد البيانات</span></a>
+        <a href="#" data-page="users" class="nav-link" id="nav-users"><span class="nav-icon"><i data-lucide="shield-check"></i></span><span>المستخدمون والصلاحيات</span></a>
+        <a href="#" data-page="audit" class="nav-link" id="nav-audit"><span class="nav-icon"><i data-lucide="history"></i></span><span>سجل التدقيق</span></a>
+        <a href="#" data-page="settings" class="nav-link" id="nav-settings"><span class="nav-icon"><i data-lucide="settings"></i></span><span>الإعدادات</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <span id="user-role-badge" class="role-badge">—</span>
+        <button id="logout-btn" class="btn-logout">تسجيل الخروج</button>
+      </div>
+    </aside>
+
+    <!-- المحتوى -->
+    <main class="content">
+      <header class="topbar">
+        <button id="sidebar-toggle" class="btn-icon">☰</button>
+        <div class="topbar-info">
+          <span id="connection-status" class="conn-online">متصل</span>
+        </div>
+      </header>
+      <section id="page-container">
+        <!-- يتم تحميل الصفحات ديناميكيًا -->
+      </section>
+    </main>
+  </div>
+
+  <!-- ========== نافذة تأكيد ========== -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 id="modal-title">تأكيد</h3>
+      <p id="modal-message"></p>
+      <input type="text" id="modal-reason" placeholder="سبب الإجراء (مطلوب)" class="modal-reason">
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn-secondary">إلغاء</button>
+        <button id="modal-confirm" class="btn-primary">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== منطقة التنبيهات ========== -->
+  <div id="toast-container"></div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
